@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.venv/
+venv/
+
+# Training artifacts
+bert_baseline/bert_squad_baseline/
+bert_baseline/logs/
+*.bin
+*.safetensors
+checkpoint-*/
+
+# HF cache (in case it ends up local)
+.cache/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
