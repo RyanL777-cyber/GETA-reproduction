@@ -1,5 +1,6 @@
 import collections
 import os
+import subprocess
 import sys
 from datetime import datetime
 
@@ -13,6 +14,62 @@ from transformers import (
     Trainer,
     DefaultDataCollator,
 )
+
+
+def select_idle_gpu(max_used_mem_mb=2000, max_util=10):
+    """Auto-select an idle GPU and set CUDA_VISIBLE_DEVICES."""
+    if "CUDA_VISIBLE_DEVICES" in os.environ:
+        value = os.environ["CUDA_VISIBLE_DEVICES"]
+        print(f"[gpu] CUDA_VISIBLE_DEVICES already set: {value}")
+        return
+
+    try:
+        proc = subprocess.run(
+            [
+                "nvidia-smi",
+                "--query-gpu=index,memory.used,utilization.gpu",
+                "--format=csv,noheader,nounits",
+            ],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+    except Exception as exc:
+        print(f"[gpu] nvidia-smi not available, skip auto GPU selection: {exc}")
+        return
+
+    gpu_candidates = []
+    for line in proc.stdout.strip().splitlines():
+        parts = [p.strip() for p in line.split(",")]
+        if len(parts) != 3:
+            continue
+        try:
+            index = int(parts[0])
+            mem_used = int(parts[1])
+            util = int(parts[2])
+        except ValueError:
+            continue
+
+        gpu_candidates.append((index, mem_used, util))
+
+    if not gpu_candidates:
+        print("[gpu] no GPUs found in nvidia-smi output")
+        return
+
+    gpu_candidates.sort(key=lambda x: (x[2], x[1]))
+    best_index, best_mem, best_util = gpu_candidates[0]
+
+    if best_util > max_util or best_mem > max_used_mem_mb:
+        print(
+            f"[gpu] selected GPU {best_index} but it is not fully idle: util={best_util}%, mem_used={best_mem}MiB"
+        )
+    else:
+        print(f"[gpu] selected idle GPU {best_index}: util={best_util}%, mem_used={best_mem}MiB")
+
+    os.environ["CUDA_VISIBLE_DEVICES"] = str(best_index)
+
+
+select_idle_gpu()
 
 # =========================
 # stdout / stderr tee → logs/run_<timestamp>.log
@@ -58,8 +115,8 @@ DOC_STRIDE = 128
 # 資料規模：None = 使用全部 (server 跑 full baseline 用)
 # 本機 smoke test: TRAIN_SAMPLES = 64, VAL_SAMPLES = 32
 # Server full run : TRAIN_SAMPLES = None, VAL_SAMPLES = None
-TRAIN_SAMPLES = 64
-VAL_SAMPLES = 32
+TRAIN_SAMPLES = None#64
+VAL_SAMPLES = None#32
 
 # 訓練超參：smoke 與 full 都用這組，只差資料量
 NUM_TRAIN_EPOCHS = 2

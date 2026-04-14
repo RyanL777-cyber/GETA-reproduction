@@ -1,0 +1,22 @@
+# ==========================================
+# Phase 1 & Phase 2: BERT SQuAD + GETA Compression
+# ==========================================
+
+# 1. 指定 PyTorch 的 CUDA 12.1 專屬下載源 (取代手動下指令)
+--extra-index-url https://download.pytorch.org/whl/cu121
+
+# 2. 核心深度學習框架 (鎖定你剛剛驗證過、絕不崩潰的 GPU 版本)
+torch==2.5.1+cu121
+
+# 3. Phase 1: NLP 訓練核心 (Hugging Face 家族)
+transformers>=4.46,<5.0
+datasets>=2.19
+evaluate>=0.4.2
+accelerate>=0.30
+
+# 4. 數據處理與進度條工具
+numpy>=1.24,<2.3
+tqdm>=4.66
+
+# 5. Phase 2: 剪枝與量化聯合最佳化框架 (GETA)
+only_train_once
