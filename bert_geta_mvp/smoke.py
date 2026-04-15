@@ -211,6 +211,118 @@ def m3_5_param_dup_check(model):
 
 
 # =========================================================================
+# M3.6. 檢查 OTO 的 param_groups 是否有重複參數（方向 B 診斷）
+# =========================================================================
+@step("M3.6 OTO param_groups duplicate check")
+def m36_check_oto_param_groups(oto):
+    """在 geta() 前檢查 _graph.get_param_groups() 中的參數重複。"""
+    param_groups_result = oto._graph.get_param_groups()
+    
+    # param_groups 可能是 dict 或 dict_values，先轉成 list
+    if hasattr(param_groups_result, 'items'):
+        param_groups = list(param_groups_result.values())
+    else:
+        param_groups = list(param_groups_result)
+    
+    log.info(f"    total param_groups: {len(param_groups)}")
+    
+    all_param_ids = []
+    dup_map = {}  # param_id -> [(group_idx, param_name), ...]
+    
+    for pg_idx, pg in enumerate(param_groups):
+        pg_params = pg.get('params', [])
+        pg_names = pg.get('p_names', [])
+        is_prunable = pg.get('is_prunable', False)
+        is_auxiliary = pg.get('is_auxiliary', False)
+        log.info(f"    group[{pg_idx}]: {len(pg_params)} params, prunable={is_prunable}, auxiliary={is_auxiliary}")
+        
+        for name, p in zip(pg_names, pg_params):
+            pid = id(p)
+            if pid not in dup_map:
+                dup_map[pid] = []
+            dup_map[pid].append((pg_idx, name))
+    
+    # 找出重複的參數
+    dups_found = {pid: info for pid, info in dup_map.items() if len(info) > 1}
+    if dups_found:
+        log.error(f"    FOUND {len(dups_found)} parameters in multiple groups!")
+        for pid, info in list(dups_found.items())[:5]:
+            log.error(f"      param_id={pid}: appears in groups {info}")
+        log.info("    => M4 failure 來自 GETA 自己的 param grouping bug（方向 B 確認）")
+        return dups_found
+    else:
+        log.info("    => OTO param_groups 無重複參數")
+        log.info("    => 故障點在 GETA optimizer 內的 add_param_group 邏輯本身")
+        return None
+
+
+# =========================================================================
+# M3.7. 去重 param_groups（方案 B）
+# =========================================================================
+@step("M3.7 deduplicate param_groups (workaround)")
+def m37_deduplicate_param_groups(oto, dups_found):
+    """如果 M3.6 找到重複，則在此去重。"""
+    if not dups_found:
+        log.info("    no duplicates to remove, skip")
+        return
+    
+    # 取得原始 param_groups
+    param_groups_result = oto._graph.get_param_groups()
+    if hasattr(param_groups_result, 'items'):
+        param_groups = list(param_groups_result.values())
+    else:
+        param_groups = list(param_groups_result)
+    
+    # 去重邏輯
+    seen_param_ids = set()
+    deduplicated = []
+    removed_count = 0
+    
+    for pg_idx, pg in enumerate(param_groups):
+        pg_params = pg.get('params', [])
+        pg_names = pg.get('p_names', [])
+        
+        new_params = []
+        new_p_names = []
+        
+        for name, p in zip(pg_names, pg_params):
+            pid = id(p)
+            if pid not in seen_param_ids:
+                new_params.append(p)
+                new_p_names.append(name)
+                seen_param_ids.add(pid)
+            else:
+                removed_count += 1
+        
+        # 如果 group 還有參數，才保留，並更新元數據
+        if len(new_params) > 0:
+            pg['params'] = new_params
+            pg['p_names'] = new_p_names
+            
+            # 更新 p_transform (移除對應的移除參數的 transform)
+            # WARNING: 這假設 p_transform 和 params 的順序相同
+            if 'p_transform' in pg and pg['p_transform']:
+                old_transforms = pg['p_transform']
+                new_transforms = [t for (t, p) in zip(old_transforms, pg_params) if id(p) in seen_param_ids]
+                pg['p_transform'] = new_transforms
+            
+            deduplicated.append(pg)
+    
+    log.info(f"    removed {removed_count} duplicate param references")
+    log.info(f"    kept {len(deduplicated)}/{len(param_groups)} param_groups with unique params")
+    
+    # 把去重後的結果存到 OTO 中，讓 geta() 使用
+    # 方式：臨時覆蓋 oto._graph.get_param_groups 的返回結果
+    original_get_param_groups = oto._graph.get_param_groups
+    oto._graph.get_param_groups = lambda: deduplicated
+    
+    # 存下原始方法供 M4 恢復
+    oto._dedup_original_get_param_groups = original_get_param_groups
+    
+    log.info("    => param_groups 已去重。M4 會使用這個版本")
+
+
+# =========================================================================
 # M4. geta optimizer
 # =========================================================================
 @step("M4 oto.geta(...)")
@@ -301,6 +413,9 @@ def main():
     model = m2_quantize_wrap(model)
     oto = m3_build_oto(model, tokenizer)
     m3_5_param_dup_check(model)
+    dups_found = m36_check_oto_param_groups(oto)
+    if dups_found:
+        m37_deduplicate_param_groups(oto, dups_found)
     optimizer = m4_build_optimizer(oto)
     m5_train_loop(model, optimizer, tokenizer)
     log.info("[OK] phase 3 smoke test PASSED — BERT × GETA wired up")
