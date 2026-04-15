@@ -134,8 +134,13 @@ def main():
 
     raw_param_groups = dict(sorted(raw_param_groups.items(), key=lambda kv: kv[0]))
 
+    # --- 用 model.named_parameters() 建 canonical name 對照表（單一真相）---
+    canonical = {}  # id(p) -> canonical name from model.named_parameters()
+    for name, p in model.named_parameters():
+        canonical[id(p)] = name
+
     # --- 統計重複 ---
-    owners = defaultdict(list)  # param_id -> [(group_id, p_name), ...]
+    owners = defaultdict(list)  # param_id -> [(group_id, p_name_in_that_group), ...]
     total_slots = 0
     for group_id, pg in raw_param_groups.items():
         for name, p in zip(pg["p_names"], pg["params"]):
@@ -151,39 +156,70 @@ def main():
     print(f"total groups       : {len(raw_param_groups)}")
     print(f"total param slots  : {total_slots}")
     print(f"unique param ids   : {unique_params}")
+    print(f"model.named_params : {len(canonical)}")
     print(f"duplicated params  : {len(dup_params)}  (占掉 {dup_slot_count} 個額外 slot)")
     print("=" * 78)
 
-    # --- 分類：量化 scalar vs 主 weight ---
-    QUANT_MARKERS = ("d_quant", "t_quant", "q_m", "clip_val", "quant_")
-    quant_dups = []
-    weight_dups = []
+    # --- 用 canonical name 分類 ---
+    QUANT_MARKERS = ("d_quant", "t_quant", "q_m", "clip_val", "quant_", "weight_scale", "act_scale")
+    buckets = defaultdict(list)  # category -> [canonical_name, ...]
+    unknown_ids = []  # 不在 named_parameters 裡的（理論上不該出現）
+
     for pid, info in dup_params.items():
-        name_sample = info[0][1]
-        if any(m in name_sample for m in QUANT_MARKERS):
-            quant_dups.append((pid, info))
+        cname = canonical.get(pid)
+        if cname is None:
+            unknown_ids.append((pid, info[0][1]))
+            continue
+        is_quant = any(m in cname for m in QUANT_MARKERS)
+        # 再依後綴粗分類
+        if is_quant:
+            cat = "quant_scalar"
+        elif cname.endswith(".weight") and "LayerNorm" in cname:
+            cat = "layernorm_weight"
+        elif cname.endswith(".bias") and "LayerNorm" in cname:
+            cat = "layernorm_bias"
+        elif cname.endswith(".weight"):
+            cat = "linear_weight"
+        elif cname.endswith(".bias"):
+            cat = "linear_bias"
+        elif "embedding" in cname.lower():
+            cat = "embedding"
         else:
-            weight_dups.append((pid, info))
+            cat = "other"
+        buckets[cat].append((cname, len(info)))
 
     print()
-    print(f"[分類] 量化 scalar 重複 : {len(quant_dups)}")
-    print(f"[分類] 主 weight 重複   : {len(weight_dups)}")
+    print("--- 依 canonical name 分類 ---")
+    for cat in sorted(buckets.keys()):
+        print(f"  {cat:20s} : {len(buckets[cat])}")
+    if unknown_ids:
+        print(f"  NOT_IN_NAMED_PARAMS  : {len(unknown_ids)}  <-- 這些沒出現在 model.named_parameters() 裡")
+
+    # --- 每類印前 5 個 canonical name ---
     print()
+    print("--- 每類前 5 個樣本 ---")
+    for cat in sorted(buckets.keys()):
+        print(f"[{cat}]")
+        for cname, ncopies in buckets[cat][:5]:
+            print(f"    x{ncopies}  {cname}")
 
-    print("--- 前 15 個重複參數明細 ---")
-    for i, (pid, info) in enumerate(list(dup_params.items())[:15]):
-        print(f"[{i}] id={pid}  出現次數={len(info)}")
-        for gid, pname in info:
-            print(f"     group={gid}  p_name={pname}")
-
-    if weight_dups:
+    if unknown_ids:
         print()
-        print("!!! 主 weight 被重複（需要重新設計 dedup 策略）!!!")
-        for pid, info in weight_dups[:10]:
-            print(f"  {info}")
+        print("--- 不在 named_parameters 的樣本（前 10）---")
+        for pid, pname in unknown_ids[:10]:
+            print(f"    id={pid}  p_name_in_group={pname}")
+
+    # --- 最後 verdict ---
+    print()
+    weight_like = sum(len(v) for k, v in buckets.items() if k != "quant_scalar")
+    quant_like = len(buckets.get("quant_scalar", []))
+    print("=" * 78)
+    print(f"VERDICT: quant_scalar={quant_like}  non_quant={weight_like}  unknown={len(unknown_ids)}")
+    if weight_like == 0 and len(unknown_ids) == 0:
+        print(">>> 全部是量化 scalar → workaround 合理，Phase 4 可直接走 <<<")
     else:
-        print()
-        print(">>> 所有重複都是量化 scalar → workaround 完全合理，Phase 4 可直接走 <<<")
+        print("!!! 有非量化 param 被重複 → 需要檢視 dedup 是否丟了 prune mask 投票權 !!!")
+    print("=" * 78)
 
 
 if __name__ == "__main__":
