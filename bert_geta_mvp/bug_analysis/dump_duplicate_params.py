@@ -76,6 +76,7 @@ def main():
     from only_train_once.quantization.quant_model import model_to_quantize_model
     from only_train_once.quantization.quant_layers import QuantizationMode
     model = model_to_quantize_model(model, quant_mode=QuantizationMode.WEIGHT_AND_ACTIVATION)
+    model = model.to(DEVICE)  # 量化包裝會新增 CPU scalar，必須搬回 GPU
     print("[M2] wrapped with QuantizedLinear")
 
     # --- M3: dummy input + OTO ---
