@@ -1,0 +1,52 @@
+00:14:26 | INFO | [log] writing to /home/h24116081/GETA reprocution/GETA-reproduction/bert_geta_mvp/logs/smoke_20260416_001425.log
+00:14:26 | INFO | [env] torch=2.5.1+cu121  device=cuda  cuda=True
+00:14:26 | INFO | [M] start: M1 load bert-base-uncased
+00:14:29 | INFO | [v] done : M1 load bert-base-uncased
+00:14:29 | INFO | [M] start: M2 model_to_quantize_model (WEIGHT_AND_ACTIVATION)
+00:14:29 | INFO | [v] done : M2 model_to_quantize_model (WEIGHT_AND_ACTIVATION)
+00:14:29 | INFO | [M] start: M3 build OTO with dict dummy_input
+00:14:29 | INFO |     dummy keys=['input_ids', 'token_type_ids', 'attention_mask']  input_ids.shape=(1, 384)
+00:15:24 | INFO | [v] done : M3 build OTO with dict dummy_input
+00:15:24 | INFO | [M] start: M3.5 param-dup diagnostic
+00:15:24 | INFO |     param_count=637  unique=637  dup=0
+00:15:24 | INFO |     => model params 無重複，M4 failure 應在 GETA 自己的 param grouping（方向 B）
+00:15:24 | INFO | [v] done : M3.5 param-dup diagnostic
+00:15:24 | INFO | [M] start: M3.6 OTO param_groups duplicate check
+00:15:24 | INFO |     total param_groups: 26
+00:15:24 | INFO |     group[0]: 8 params, prunable=True, auxiliary=False
+00:15:24 | INFO |     group[1]: 24 params, prunable=True, auxiliary=False
+00:15:24 | INFO |     group[2]: 8 params, prunable=True, auxiliary=False
+00:15:24 | INFO |     group[3]: 24 params, prunable=True, auxiliary=False
+00:15:24 | INFO |     group[4]: 8 params, prunable=True, auxiliary=False
+00:15:24 | INFO |     group[5]: 24 params, prunable=True, auxiliary=False
+00:15:24 | INFO |     group[6]: 8 params, prunable=True, auxiliary=False
+00:15:24 | INFO |     group[7]: 24 params, prunable=True, auxiliary=False
+00:15:24 | INFO |     group[8]: 8 params, prunable=True, auxiliary=False
+00:15:24 | INFO |     group[9]: 24 params, prunable=True, auxiliary=False
+00:15:24 | INFO |     group[10]: 8 params, prunable=True, auxiliary=False
+00:15:24 | INFO |     group[11]: 24 params, prunable=True, auxiliary=False
+00:15:24 | INFO |     group[12]: 8 params, prunable=True, auxiliary=False
+00:15:24 | INFO |     group[13]: 24 params, prunable=True, auxiliary=False
+00:15:24 | INFO |     group[14]: 8 params, prunable=True, auxiliary=False
+00:15:24 | INFO |     group[15]: 24 params, prunable=True, auxiliary=False
+00:15:24 | INFO |     group[16]: 8 params, prunable=True, auxiliary=False
+00:15:24 | INFO |     group[17]: 24 params, prunable=True, auxiliary=False
+00:15:24 | INFO |     group[18]: 8 params, prunable=True, auxiliary=False
+00:15:24 | INFO |     group[19]: 24 params, prunable=True, auxiliary=False
+00:15:24 | INFO |     group[20]: 245 params, prunable=True, auxiliary=False
+00:15:24 | INFO |     group[21]: 8 params, prunable=True, auxiliary=False
+00:15:24 | INFO |     group[22]: 24 params, prunable=True, auxiliary=False
+00:15:24 | INFO |     group[23]: 24 params, prunable=True, auxiliary=False
+00:15:24 | INFO |     group[24]: 8 params, prunable=True, auxiliary=False
+00:15:24 | INFO |     group[25]: 8 params, prunable=False, auxiliary=False
+00:15:24 | INFO |     => OTO param_groups 無重複參數
+00:15:24 | INFO |     => 故障點在 GETA optimizer 內的 add_param_group 邏輯本身
+00:15:24 | INFO | [v] done : M3.6 OTO param_groups duplicate check
+00:15:24 | INFO | [M] start: M4 oto.geta(...)
+00:15:24 | INFO |     optimizer type=GETA
+00:15:24 | INFO | [v] done : M4 oto.geta(...)
+00:15:24 | INFO | [M] start: M5 2-batch forward + backward + step
+00:15:29 | INFO |     batch 1/2  loss=5.9593
+00:15:30 | INFO |     batch 2/2  loss=5.9469
+00:15:30 | INFO | [v] done : M5 2-batch forward + backward + step
+00:15:30 | INFO | [OK] phase 3 smoke test PASSED — BERT × GETA wired up
