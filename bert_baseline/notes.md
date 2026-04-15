@@ -2,12 +2,56 @@
 
 ## 目前進度
 - [x] 建立最小 baseline script (`baseline_bert_squad.py`)
-- [x] 修掉三個實質 bug（見下方）
-- [ ] Smoke test 在本機跑通（64 train / 32 val）
-- [ ] Server 上用較完整資料重跑，記錄 EM / F1
-- [ ] 判斷是否可進入 Phase 2（GETA 整合）
+- [x] 修掉四個實質 bug（見下方）
+- [x] Smoke test 在本機跑通（64 train / 32 val，F1 ≈ 9.76，線路驗證用）
+- [x] Server 上用 full data 重跑（87599 train / 10570 val，2 epoch）
+- [x] **Phase 1 結案：EM = 81.14 / F1 = 88.50，可進 Phase 2（GETA 整合）**
 
-## 當前設定（Smoke test）
+## Baseline 結果（2026-04-15，server full run）
+| 項目 | 數值 |
+|---|---|
+| train samples | 87599（full SQuAD v1.1 train）|
+| val samples | 10570（full SQuAD v1.1 validation）|
+| epochs | 2 |
+| batch size | 12 (train) / 32 (eval) |
+| learning_rate | 3e-5 |
+| weight_decay | 0.01 |
+| total steps | 14754 |
+| train_runtime | 6504s ≈ 108 min |
+| throughput | 27.2 samples/s, 2.27 steps/s |
+| train_loss (avg) | 0.978 |
+| loss 起 → 終 | 4.61 → 0.68（健康收斂，無 NaN/爆炸）|
+| grad_norm 峰值 | ~23（未爆炸）|
+| **Exact Match** | **81.14** |
+| **F1** | **88.50** |
+
+**對照**：HuggingFace 官方 `bert-base-uncased` + SQuAD v1.1 標準 baseline 約 EM ~80.8 / F1 ~88.5，本次結果完全貼合。這驗證了：
+- preprocess 正確（answer span 對齊無誤）
+- post-process 正確（offset_mapping 還原 answer 無誤）
+- metric 計算正確（squad metric 輸出合理）
+- 沒有資料流 bug
+
+**Phase 1 驗收 checklist**
+- [x] 成功載入 bert-base-uncased
+- [x] 成功載入 SQuAD
+- [x] training preprocess 正常
+- [x] validation preprocess 正常
+- [x] script 可以正常 train
+- [x] script 可以正常 eval
+- [x] 可正確輸出 EM / F1
+- [x] 沒有阻塞性錯誤
+- [x] F1 ≥ 85（自訂硬門檻，實際 88.50）
+- [x] baseline 結果已紀錄（本節）
+
+## Phase 2 前的 open items
+接 GETA 之前應該回頭確認的事項（目前都是 HF 預設或假設值，非 paper-confirmed）：
+- paper 是否用 `bert-base-uncased` 還是 cased？（目前假設 uncased）
+- paper 的 batch size / epochs / lr / warmup / weight_decay 是否與本 baseline 一致？
+- paper 的 max_length / doc_stride 是否 384 / 128？
+- seed 還沒設 → 若 GETA 實驗要報 mean±std 需要固定
+- 本次結果是 single run，沒跑多 seed 誤差
+
+## 當前設定（script 預設，smoke / full 只差 SAMPLES）
 | 項目 | 值 | 來源 |
 |---|---|---|
 | model | `bert-base-uncased` | **已知事實**（phase 1.md 指定）|
@@ -17,11 +61,12 @@
 | max_length | 384 | **假設**（HF 官方教學預設）|
 | doc_stride | 128 | **假設**（HF 官方教學預設）|
 | learning_rate | 3e-5 | **假設** |
-| batch size | 8 (train & eval) | **假設** |
-| epochs | 1 | **假設**，smoke test 用 |
+| train batch size | 12 | **假設** |
+| eval batch size | 32 | **假設** |
+| epochs | 2 | **假設**（full run 用）|
 | weight_decay | 0.01 | **假設** |
-| train samples | 64 | **假設**，純線路驗證 |
-| val samples | 32 | **假設**，純線路驗證 |
+| TRAIN_SAMPLES | 64（smoke）/ None（full）| 切換 |
+| VAL_SAMPLES | 32（smoke）/ None（full）| 切換 |
 | seed | 未設 | **待決定** |
 
 > 所有標「假設」的項目都不是 paper-confirmed。Phase 2 接 GETA / 對齊 Table 3 之前必須重新確認。
