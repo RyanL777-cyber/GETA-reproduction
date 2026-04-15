@@ -10,6 +10,11 @@ import sys
 import traceback
 from datetime import datetime
 
+# --- 加入 GETA 源代碼路徑 ---
+_GETA_ROOT = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "geta")
+if os.path.isdir(_GETA_ROOT) and _GETA_ROOT not in sys.path:
+    sys.path.insert(0, _GETA_ROOT)
+
 
 # --- 自動挑閒置 GPU（必須在 import torch 之前） ---
 def select_idle_gpu(max_used_mem_mb=2000, max_util=10):
@@ -155,10 +160,19 @@ def m3_build_oto(model, tokenizer):
         max_length=MAX_LENGTH, truncation="only_second",
         padding="max_length", return_tensors="pt",
     )
-    dummy_input = {k: v.to(DEVICE) for k, v in enc.items()}
-    log.info(f"    dummy keys={list(dummy_input.keys())}  input_ids.shape={tuple(dummy_input['input_ids'].shape)}")
+    dummy_dict = {k: v.to(DEVICE) for k, v in enc.items()}
+    log.info(f"    dummy keys={list(dummy_dict.keys())}  input_ids.shape={tuple(dummy_dict['input_ids'].shape)}")
+
+    # OTO 不支援 dict 輸入，所以需要用 tuple/tensor 包裝
+    # 轉換: (input_ids, attention_mask, token_type_ids) → BERT forward
+    dummy_input = (
+        dummy_dict["input_ids"],
+        dummy_dict["attention_mask"],
+        dummy_dict["token_type_ids"],
+    )
 
     model.eval()  # tracing 時關 dropout，避免隨機性干擾圖建構
+    model = model.to(DEVICE)  # 確保所有參數在正確的 device
     from only_train_once import OTO
     oto = OTO(model=model, dummy_input=dummy_input)
     model.train()

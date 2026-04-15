@@ -1,0 +1,13 @@
+18:59:56 | INFO | [log] writing to /home/h24116081/GETA reprocution/GETA-reproduction/bert_geta_mvp/logs/smoke_20260415_185955.log
+18:59:56 | INFO | [env] torch=2.5.1+cu121  device=cuda  cuda=True
+18:59:56 | INFO | [M] start: M1 load bert-base-uncased
+18:59:59 | INFO | [v] done : M1 load bert-base-uncased
+18:59:59 | INFO | [M] start: M2 model_to_quantize_model (WEIGHT_AND_ACTIVATION)
+18:59:59 | ERROR | [X] FAIL : M2 model_to_quantize_model (WEIGHT_AND_ACTIVATION) -> ModuleNotFoundError: No module named 'only_train_once'
+18:59:59 | ERROR |     Traceback (most recent call last):
+18:59:59 | ERROR |       File "/home/h24116081/GETA reprocution/GETA-reproduction/bert_geta_mvp/smoke.py", line 93, in wrapped
+18:59:59 | ERROR |         out = fn(*args, **kwargs)
+18:59:59 | ERROR |       File "/home/h24116081/GETA reprocution/GETA-reproduction/bert_geta_mvp/smoke.py", line 144, in m2_quantize_wrap
+18:59:59 | ERROR |         from only_train_once.quantization.quant_model import model_to_quantize_model
+18:59:59 | ERROR |     ModuleNotFoundError: No module named 'only_train_once'
+18:59:59 | ERROR | [log] saved to /home/h24116081/GETA reprocution/GETA-reproduction/bert_geta_mvp/logs/smoke_20260415_185955.log
