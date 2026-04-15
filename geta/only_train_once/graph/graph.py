@@ -1367,8 +1367,15 @@ class Graph:
 
         # Deduplicate parameters across groups to avoid invalid PyTorch optimizer
         # initialization when the same parameter appears in multiple groups.
+        # Iterate smaller groups first so per-layer (e.g. head) groups keep their
+        # params instead of losing them to the large trunk group. Falling back to
+        # group_id for deterministic tie-breaking.
         seen_param_ids = set()
-        for group_id, param_group in list(param_groups.items()):
+        dedup_order = sorted(
+            param_groups.items(),
+            key=lambda kv: (len(kv[1].get("params", [])), kv[0]),
+        )
+        for group_id, param_group in dedup_order:
             params = param_group.get("params", [])
             if len(params) == 0:
                 continue
