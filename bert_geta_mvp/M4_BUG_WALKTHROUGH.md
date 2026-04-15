@@ -375,3 +375,71 @@ for pid, info in owners.items():
 ## 8. 一句話總結（改寫）
 
 > GETA 的 `step()` 本來就假設每個 param 只被步一次（`p.data.add_` 是 in-place），所以 dedup workaround 在 update 層其實是**恢復原設計不變量**，不是 hack。唯一還有風險的是「重複的那 32 個 param 本來該被多個 prune group 投票」——但若它們只是量化 scalar（`weight_clip_val`/`d_quant_wt` 這類，猜測但未證），影響可忽略。**要確定就只需跑一個 script 印出 32 個 name**；根據結果再決定 Phase 4 能否直接走。
+
+
+
+白話講解：「重複是不是 bug？」
+先把整個問題切成兩層，不要混在一起。
+
+第一層：QADG 層（剪枝依賴圖）
+這一層說的是「為了決定要剪掉哪些 channel / head，GETA 把每個參數分成『要一起剪』的群組」。
+
+問題：BERT 的 Q.weight 該屬於哪一群？
+
+BERT attention 的 Q 是一個 Linear 768→768。它可以從兩個角度看：
+
+角度 A（head 視角）：Q 的輸出 768 維被切成 12 個 head × 64 維。要剪 attention head 時，必須同時從 Q、K、V 三個 Linear 的對應 64 欄一起剪。→ Q 和 K、V 綁在一個「head 剪枝群」裡。
+角度 B（trunk 視角）：Q 的輸入 768 維是 residual trunk。如果要把 trunk 從 768 壓到 512，所有「讀 trunk」的 Linear——包括 Q、K、V、FFN.up、embeddings 出口——的輸入 column 都要一起砍。→ Q 也屬於一個「trunk channel 剪枝群」。
+這兩個角度都是對的。同一個 Q.weight tensor 本來就在兩個群裡。 不是 GETA 不小心把它塞兩次，是結構化剪枝的數學本來就要求這樣。如果你只把 Q 放一邊，另一邊的剪枝決策就少了一個重要資料點。
+
+所以在 QADG 層，這不是 bug，是 feature。
+
+第二層：PyTorch optimizer 層（更新參數）
+這一層說的是「拿到梯度後怎麼更新 param」。
+
+PyTorch 要求 optimizer 裡的 param 不能重複——不是為了哲學，是因為 GETA 自己的 step() 寫成這樣：
+
+
+for group in self.param_groups:
+    for p in group["params"]:
+        p.data.add_(-lr * grad)   # in-place 直接改 p.data
+如果 Q.weight 出現在兩個 group 裡，這個 for 迴圈會對它呼叫兩次 p.data.add_——同一步減兩次 lr×grad，等於偷偷用了 2 倍的 learning rate。這是明顯的 bug。
+
+所以在 optimizer 層，重複是 bug，一定要 dedup。
+
+結合起來：GETA 作者的設計有矛盾
+作者把兩層硬塞在同一個 dict 結構裡：param_groups 這個 dict 同時是「QADG 剪枝群」（這層要允許重複）又是 PyTorch optimizer 吃的 param_group（這層禁止重複）。這兩個需求直接打架。
+
+所以 bug 的真正位置不是「為什麼會重複」——重複是對的。bug 是作者沒有把這兩層分開。正確的設計應該長這樣：
+
+
+QADG 層（允許重複）：決定每個 param 的 prune mask
+        │ 輸出 mask
+        ▼
+optimizer 層（唯一）：一個 param 只在一個 param_group，負責更新
+        │ step() 時套用 QADG 傳來的 mask
+作者把 QADG 的輸出直接餵給 optimizer，重疊語意就漏到下一層。
+
+現在的 workaround 做了什麼
+在 get_param_groups() 回傳前加一段 dedup：按 group id 順序，同一個 param 只留在第一個遇到的 group。
+
+解決了第二層的問題：每個 param 只會被 p.data.add_ 一次 ✅
+但犧牲了第一層的資訊：那個 param 對「另一個 group」的 prune vote 被丟掉了 ⚠️
+為什麼我說「看 Q/K/V 落在哪個 group」很關鍵
+因為 dedup 不是「把重複抹掉」，而是「把 param 判給某一邊」。判給誰，決定哪一邊的剪枝決策會退化：
+
+如果 Q/K/V 被判給 head 群（id 較小）：
+Head 剪枝：Q、K、V 都在，資訊完整 ✅
+Trunk 剪枝：少了 Q、K、V 的投票，但還有 O、FFN.up、FFN.down、LayerNorm 能投 → 打折但可用 ⚠️
+這是可接受的情況
+如果 Q/K/V 被判給 trunk 群（id 較小）：
+Trunk 剪枝：Q、K、V 都在 ✅
+Head 剪枝：Q、K、V 全都不在——可是 head 群的本質就是要剪 Q/K/V 的 head！這個群基本上變成空殼 ❌
+這是壞的情況，會讓 head-wise 剪枝幾乎失效
+所以這個 dump script 最後印 Q.weight 兩個 group 的 id、哪個小、大小各多少，就能知道我們現在踩在哪種情況上。
+
+最終結論
+「同一個 param 屬於多個 QADG 群」本身不是 bug——是結構化剪枝的正確語意。
+「把 QADG 群直接當 PyTorch optimizer group」才是 bug——兩層語意被硬塞在一個資料結構。
+workaround 是在 optimizer 層補一刀 dedup——解決了 2x update 的問題，但可能把某些群的 prune vote 砍掉。砍得嚴不嚴重，要看判給誰。
+跑完 print 就能知道判給誰。

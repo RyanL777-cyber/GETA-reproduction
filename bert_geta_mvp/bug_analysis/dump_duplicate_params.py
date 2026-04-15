@@ -209,6 +209,29 @@ def main():
         for pid, pname in unknown_ids[:10]:
             print(f"    id={pid}  p_name_in_group={pname}")
 
+    # --- 步驟 1：看 Q/K/V.weight 的兩個 group id 誰大誰小 ---
+    # dedup 是 sorted by group id 後先到先得，所以 id 較小的 group 會留下 param。
+    print()
+    print("--- Q/K/V weight 的 group ownership（決定 dedup 後留在哪）---")
+    qkv_targets = []
+    for pid, info in dup_params.items():
+        cname = canonical.get(pid, "")
+        if cname.endswith(".weight") and any(x in cname for x in (".query.", ".key.", ".value.")):
+            qkv_targets.append((cname, info))
+    # 排序讓同層 Q/K/V 靠在一起
+    qkv_targets.sort(key=lambda x: x[0])
+    for cname, info in qkv_targets[:9]:  # 前 3 層 × 3
+        gids = sorted([gid for gid, _ in info])
+        winner = min(gids)  # dedup 後留在 id 最小的 group
+        print(f"    {cname}")
+        print(f"        groups={gids}  -> kept in group {winner}")
+
+    # 看看各 group 的大小，判斷 winner 是 head 群還是 trunk 群
+    print()
+    print("--- 各 group 的大小（params 數量，和 smoke log 對照）---")
+    for gid, pg in raw_param_groups.items():
+        print(f"    group[{gid}]: {len(pg['params'])} params")
+
     # --- 最後 verdict ---
     print()
     weight_like = sum(len(v) for k, v in buckets.items() if k != "quant_scalar")
