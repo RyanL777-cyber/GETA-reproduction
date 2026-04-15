@@ -116,3 +116,50 @@ smoke.py 流程:
 3. **回溯**: 檢查 GETA 官方教程 (Tutorial 03) 是否有 BERT 的例子
 4. **替代**: 考慮是否要用「自訂 training loop + 手動 optimizer.step()」而不是依賴 `oto.geta()` 的自動包裝
 
+---
+
+## Claude 的意見（2026-04-15 追加）
+
+### 對目前分析的回饋
+
+Copilot 的錯誤定位是對的（`add_param_group` 重複檢查），但**方向 1～4 順序有問題**：方向 3（官方 tutorial）和方向 4（自訂 training loop）都是「繞路」而不是「找原因」。在還不知道是 *model 本身* 還是 *GETA 自身* 出錯前，就跳去寫替代方案等於瞎猜。**應該先做最便宜的診斷，把可能性切一半。**
+
+### 切一半的 3 行診斷（已加進 smoke.py 的 M3.5）
+
+```python
+ids = [id(p) for p in model.parameters()]
+log.info(f"param_count={len(ids)}  unique={len(set(ids))}  dup={len(ids)-len(set(ids))}")
+```
+
+- **`dup > 0`** → **方向 A**：問題在 M2 的 `model_to_quantize_model`。量化包裝時沒有正確 detach 舊 weight，同一個 `nn.Parameter` 被兩個不同的 module attribute 同時指向，導致 `model.parameters()` 迭代時出現兩次。這類問題 GETA 完全不用改，只要修 quant wrapping（或在 wrapper 之後手動去重）。
+- **`dup = 0`** → **方向 B**：model 本身沒有 duplicate，問題在 `oto.geta(...)` 自己的 param grouping 邏輯 — 它可能把「要剪枝的 group」和「要量化的 group」當成兩個獨立 group 同時塞進同一個 base optimizer。這才需要去讀 `only_train_once/optimizer/` 底下 GETA 的 param groups 建構程式碼。
+
+M3.5 若 `dup > 0`，會接著印出前 10 個重複的 `(name_a, name_b)` pair，直接指出是哪一層。
+
+### BERT 有沒有 weight tying 的補充
+
+`BertForQuestionAnswering` **不該有 weight tying**（和 `BertForMaskedLM` 不同，QA head 是一個獨立的 `qa_outputs` Linear），所以 baseline 狀態下 `dup` 應該是 0。如果 M3.5 在 M2 *之前* 就有 dup，才要懷疑 HF `tie_weights()` 的 side effect；若 M3.5 在 M2 *之後* 才有 dup，那就鐵定是量化包裝的鍋。**更嚴謹的診斷會在 M2 前後各量一次**，這點之後可以再加。
+
+### 方向 3（hesso fallback）什麼時候有用
+
+只在 **`dup = 0`** 的情況下才做為「再切一半」的診斷工具：
+- `hesso` 純剪枝，不量化 → 如果 hesso 也炸同一個錯 → GETA 整個 optimizer family 對 HF transformer 都有 param grouping bug，要讀 source 修。
+- 如果 hesso 通 → 問題鎖定在 `geta()` 的 *joint* prune+quant grouping 那段。
+
+### 方向 4（自訂 training loop）不該現在做
+
+自訂 training loop 換掉的是「**如何呼叫 optimizer**」，不是「optimizer 被建立時 param group 衝突」這個問題。換 loop 也建不出 optimizer，無解。只有當 Phase 4 要用 HF Trainer 注入失敗時，才該考慮自寫 loop。現階段放一邊。
+
+### 關於 GETA 官方 tutorial 的事實
+
+Tutorials 全是 CV（ResNet18、CARN、qVGG7），**沒有任何 BERT/transformer 範例**。不用去翻了。sanity_check 裡有 Phi2/Llama 這類 HF transformer 可以參考接法，但它們都是 causal LM 不是 QA，只能看「HF kwargs 怎麼接」這個面向。詳見 `geta_knowledge/repo_map.md`。
+
+### 建議執行順序
+
+1. 跑一次有 M3.5 的 smoke.py，拿到 `dup` 數字。
+2. **若 `dup > 0`**（方向 A）：貼前 10 個重複名字給 Claude，我指示怎麼改 quant wrapping 或在 M3 前手動 dedupe。
+3. **若 `dup = 0`**（方向 B）：
+   - 先試 `oto.hesso(variant="adam", lr=3e-5, target_group_sparsity=0.5)` 看是否同樣失敗。
+   - 無論成敗都貼 log，再決定下一步（改 GETA source 或 workaround）。
+4. **不要**再往「寫自訂 loop」或「提 GitHub issue」的方向走，先把根因找到。
+

@@ -180,6 +180,37 @@ def m3_build_oto(model, tokenizer):
 
 
 # =========================================================================
+# M3.5 診斷：檢查 model.parameters() 是否有重複 id
+#      目的：判斷 M4 的 "parameters appear in more than one parameter group"
+#      是因為 (A) model 本身有 duplicate param，還是 (B) GETA optimizer 的
+#      param grouping 邏輯 bug。
+# =========================================================================
+@step("M3.5 param-dup diagnostic")
+def m3_5_param_dup_check(model):
+    params = list(model.parameters())
+    ids = [id(p) for p in params]
+    uniq = set(ids)
+    dup_count = len(ids) - len(uniq)
+    log.info(f"    param_count={len(ids)}  unique={len(uniq)}  dup={dup_count}")
+    if dup_count > 0:
+        # 找出重複的 (name, id) pair，只印前 10 個方便 debug
+        seen = {}
+        dups = []
+        for name, p in model.named_parameters():
+            pid = id(p)
+            if pid in seen:
+                dups.append((seen[pid], name))
+            else:
+                seen[pid] = name
+        log.info(f"    first {min(10, len(dups))} duplicate name pairs:")
+        for a, b in dups[:10]:
+            log.info(f"      {a}  <==>  {b}")
+        log.info("    => M4 failure 很可能來自 M2 量化包裝（方向 A：參數重複註冊）")
+    else:
+        log.info("    => model params 無重複，M4 failure 應在 GETA 自己的 param grouping（方向 B）")
+
+
+# =========================================================================
 # M4. geta optimizer
 # =========================================================================
 @step("M4 oto.geta(...)")
@@ -269,6 +300,7 @@ def main():
     tokenizer, model = m1_load_model()
     model = m2_quantize_wrap(model)
     oto = m3_build_oto(model, tokenizer)
+    m3_5_param_dup_check(model)
     optimizer = m4_build_optimizer(oto)
     m5_train_loop(model, optimizer, tokenizer)
     log.info("[OK] phase 3 smoke test PASSED — BERT × GETA wired up")
