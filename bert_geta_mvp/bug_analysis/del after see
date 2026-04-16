@@ -1,0 +1,50 @@
+(base) h24116081@acvlab:~/GETA reprocution/GETA-reproduction/bert_geta_mvp$ cd ~/GETA\ reprocution/GETA-reproduction/bert_geta_mvp
+python3 bug_analysis/check_groups.py
+2026-04-16 19:06:44,739 - only_train_once.quantization.quant_model - INFO - Converted 73 layers to quantized versions
+OTO graph constructor
+graph build
+/home/h24116081/miniconda3/lib/python3.13/site-packages/transformers/modeling_attn_mask_utils.py:196: TracerWarning: torch.tensor results are registered as constants in the trace. You can safely ignore this warning if you use this function to create tensors out of constant variables that would be the same every time you call this function. In any other case, this might cause the trace to be incorrect.
+  inverted_mask = torch.tensor(1.0, dtype=dtype) - expanded_mask
+/home/h24116081/GETA reprocution/GETA-reproduction/bert_geta_mvp/../geta/only_train_once/quantization/quant_layers.py:334: TracerWarning: torch.tensor results are registered as constants in the trace. You can safely ignore this warning if you use this function to create tensors out of constant variables that would be the same every time you call this function. In any other case, this might cause the trace to be incorrect.
+  weight_clip_val = torch.tensor(self.weight_clip_val, device=weight.device)
+/home/h24116081/GETA reprocution/GETA-reproduction/bert_geta_mvp/../geta/only_train_once/quantization/quant_layers.py:335: TracerWarning: torch.tensor results are registered as constants in the trace. You can safely ignore this warning if you use this function to create tensors out of constant variables that would be the same every time you call this function. In any other case, this might cause the trace to be incorrect.
+  q_s = torch.tensor(0.0, device=weight.device)
+/home/h24116081/GETA reprocution/GETA-reproduction/bert_geta_mvp/../geta/only_train_once/quantization/quant_layers.py:361: TracerWarning: torch.tensor results are registered as constants in the trace. You can safely ignore this warning if you use this function to create tensors out of constant variables that would be the same every time you call this function. In any other case, this might cause the trace to be incorrect.
+  activation_clip_val = torch.tensor(self.act_clip_val, device=activation.device)
+/home/h24116081/GETA reprocution/GETA-reproduction/bert_geta_mvp/../geta/only_train_once/quantization/quant_layers.py:362: TracerWarning: torch.tensor results are registered as constants in the trace. You can safely ignore this warning if you use this function to create tensors out of constant variables that would be the same every time you call this function. In any other case, this might cause the trace to be incorrect.
+  q_s = torch.tensor(0.0, device=activation.device)
+NodePattern mul None
+NodePattern transpose None
+NodePattern matmul None
+Post-processing of graph completed.
+Graph has 1102 nodes and 1177 edges.
+type=dict_values  len=26
+element type=dict
+
+  group  0:    8 params  first_names=['bert.encoder.layer.0.intermediate.dense.q_m_act', 'bert.encoder.layer.0.intermediate.dense.t_quant_wt', 'bert.encoder.layer.0.intermediate.dense.q_m_wt']
+  group  1:    8 params  first_names=['bert.encoder.layer.1.intermediate.dense.q_m_wt', 'bert.encoder.layer.1.intermediate.dense.t_quant_act', 'bert.encoder.layer.1.intermediate.dense.bias']
+  group  2:    8 params  first_names=['bert.encoder.layer.2.intermediate.dense.weight', 'bert.encoder.layer.2.intermediate.dense.d_quant_act', 'bert.encoder.layer.2.intermediate.dense.d_quant_wt']
+  group  3:    8 params  first_names=['bert.encoder.layer.3.intermediate.dense.weight', 'bert.encoder.layer.3.intermediate.dense.q_m_wt', 'bert.encoder.layer.3.intermediate.dense.d_quant_wt']
+  group  4:    8 params  first_names=['bert.encoder.layer.4.intermediate.dense.t_quant_act', 'bert.encoder.layer.4.intermediate.dense.d_quant_act', 'bert.encoder.layer.4.intermediate.dense.weight']
+  group  5:    8 params  first_names=['bert.encoder.layer.5.intermediate.dense.q_m_wt', 'bert.encoder.layer.5.intermediate.dense.weight', 'bert.encoder.layer.5.intermediate.dense.t_quant_wt']
+  group  6:    8 params  first_names=['bert.encoder.layer.6.intermediate.dense.q_m_wt', 'bert.encoder.layer.6.intermediate.dense.weight', 'bert.encoder.layer.6.intermediate.dense.t_quant_act']
+  group  7:    8 params  first_names=['bert.encoder.layer.7.intermediate.dense.weight', 'bert.encoder.layer.7.intermediate.dense.t_quant_wt', 'bert.encoder.layer.7.intermediate.dense.q_m_act']
+  group  8:    8 params  first_names=['bert.encoder.layer.8.intermediate.dense.t_quant_act', 'bert.encoder.layer.8.intermediate.dense.d_quant_wt', 'bert.encoder.layer.8.intermediate.dense.q_m_act']
+  group  9:    8 params  first_names=['bert.encoder.layer.9.intermediate.dense.bias', 'bert.encoder.layer.9.intermediate.dense.q_m_act', 'bert.encoder.layer.9.intermediate.dense.t_quant_act']
+  group 10:    8 params  first_names=['bert.encoder.layer.10.intermediate.dense.q_m_wt', 'bert.encoder.layer.10.intermediate.dense.d_quant_act', 'bert.encoder.layer.10.intermediate.dense.t_quant_act']
+  group 11:    8 params  first_names=['bert.encoder.layer.11.intermediate.dense.t_quant_act', 'bert.encoder.layer.11.intermediate.dense.d_quant_wt', 'bert.encoder.layer.11.intermediate.dense.bias']
+  group 12:    8 params  first_names=['qa_outputs.d_quant_act', 'qa_outputs.d_quant_wt', 'qa_outputs.q_m_act']
+  group 13:   24 params  first_names=['bert.encoder.layer.1.attention.self.query.weight', 'bert.encoder.layer.1.attention.self.query.bias', 'bert.encoder.layer.1.attention.self.query.d_quant_wt']
+  group 14:   24 params  first_names=['bert.encoder.layer.2.attention.self.query.weight', 'bert.encoder.layer.2.attention.self.query.bias', 'bert.encoder.layer.2.attention.self.query.d_quant_wt']
+  group 15:   24 params  first_names=['bert.encoder.layer.3.attention.self.query.weight', 'bert.encoder.layer.3.attention.self.query.bias', 'bert.encoder.layer.3.attention.self.query.d_quant_wt']
+  group 16:   24 params  first_names=['bert.encoder.layer.4.attention.self.query.weight', 'bert.encoder.layer.4.attention.self.query.bias', 'bert.encoder.layer.4.attention.self.query.d_quant_wt']
+  group 17:   24 params  first_names=['bert.encoder.layer.5.attention.self.query.weight', 'bert.encoder.layer.5.attention.self.query.bias', 'bert.encoder.layer.5.attention.self.query.d_quant_wt']
+  group 18:   24 params  first_names=['bert.encoder.layer.6.attention.self.query.weight', 'bert.encoder.layer.6.attention.self.query.bias', 'bert.encoder.layer.6.attention.self.query.d_quant_wt']
+  group 19:   24 params  first_names=['bert.encoder.layer.7.attention.self.query.weight', 'bert.encoder.layer.7.attention.self.query.bias', 'bert.encoder.layer.7.attention.self.query.d_quant_wt']
+  group 20:   24 params  first_names=['bert.encoder.layer.8.attention.self.query.weight', 'bert.encoder.layer.8.attention.self.query.bias', 'bert.encoder.layer.8.attention.self.query.d_quant_wt']
+  group 21:   24 params  first_names=['bert.encoder.layer.9.attention.self.query.weight', 'bert.encoder.layer.9.attention.self.query.bias', 'bert.encoder.layer.9.attention.self.query.d_quant_wt']
+  group 22:   24 params  first_names=['bert.encoder.layer.10.attention.self.query.weight', 'bert.encoder.layer.10.attention.self.query.bias', 'bert.encoder.layer.10.attention.self.query.d_quant_wt']
+  group 23:   24 params  first_names=['bert.encoder.layer.11.attention.self.query.weight', 'bert.encoder.layer.11.attention.self.query.bias', 'bert.encoder.layer.11.attention.self.query.d_quant_wt']
+  group 24:   24 params  first_names=['bert.encoder.layer.0.attention.self.query.weight', 'bert.encoder.layer.0.attention.self.query.bias', 'bert.encoder.layer.0.attention.self.query.d_quant_wt']
+  group 25:  245 params  first_names=['bert.embeddings.word_embeddings.weight', 'bert.embeddings.LayerNorm.weight', 'bert.embeddings.LayerNorm.bias']
+(base) h24116081@acvlab:~/GETA reprocution/GETA-reproduction/bert_geta_mvp$ 

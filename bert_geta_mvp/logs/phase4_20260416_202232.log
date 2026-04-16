@@ -1,0 +1,40 @@
+20:22:33 | INFO | [log] writing to /home/h24116081/GETA reprocution/GETA-reproduction/bert_geta_mvp/logs/phase4_20260416_202232.log
+20:22:33 | INFO | [env] torch=2.5.1+cu121  device=cuda
+20:22:33 | INFO | [cfg] train_samples=2000  val_samples=500  epochs=1  batch_size=8  lr=3e-05  lr_quant=0.0001  target_sparsity=0.5  bit_reduction=2
+20:22:33 | INFO | [M1] loading BERT QA + tokenizer
+20:22:36 | INFO | [M1] done
+20:22:36 | INFO | [M2] model_to_quantize_model
+20:22:38 | INFO | [M2] done
+20:22:38 | INFO | [M3] building OTO graph
+20:23:36 | INFO | [M3] done
+20:23:36 | INFO | [M3+] marked word_embeddings unprunable
+20:23:36 | INFO | [DATA] loading SQuAD
+20:23:42 | INFO | [DATA] train features=2054  val features=520  raw val examples=500
+20:23:42 | INFO | [SCHED] steps_per_epoch=257  total_steps=257  start_pruning=25  pruning_steps=64
+20:23:42 | INFO | [M4] building GETA optimizer
+20:23:42 | INFO | [M4] GETA optimizer built, 26 param groups
+20:23:42 | INFO | [EVAL] baseline (before training)
+20:24:46 | INFO | [EVAL] baseline EM=0.00  F1=6.87
+20:24:46 | INFO | [TRAIN] starting
+20:28:57 | INFO |     step 50  loss=5.9501  grp_sparsity=0.200  norm_import=33793.94  norm_redund=1895.69
+20:33:20 | INFO |     step 100  loss=5.9508  grp_sparsity=0.500  norm_import=23944.85  norm_redund=0.00
+20:37:30 | INFO |     step 150  loss=5.9502  grp_sparsity=0.500  norm_import=23944.56  norm_redund=0.00
+20:41:41 | INFO |     step 200  loss=5.9466  grp_sparsity=0.500  norm_import=23944.45  norm_redund=0.00
+20:45:53 | INFO |     step 250  loss=5.9156  grp_sparsity=0.500  norm_import=23945.28  norm_redund=0.00
+20:46:29 | INFO | [EPOCH 1/1] avg_loss=5.9049  grp_sparsity=0.500  n_import=18504  n_redund=18504
+20:47:32 | INFO | [EVAL epoch 1] EM=0.20  F1=6.62
+20:47:32 | INFO | [SUBNET] constructing compressed model
+20:47:33 | INFO | [SUBNET] full model  : ./phase4_out/BertForQuestionAnswering_full_group_sparse.pt
+20:47:33 | INFO | [SUBNET] compressed  : ./phase4_out/BertForQuestionAnswering_compressed.pt
+20:47:33 | INFO | [METRICS] full BOPs=1608966.2M  params=94.66M
+20:47:35 | ERROR | [SUBNET] failed: RuntimeError: mat1 and mat2 shapes cannot be multiplied (3072x1008 and 3072x768)
+20:47:35 | ERROR | ^^^^^^^^^
+  File "/home/h24116081/miniconda3/lib/python3.13/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/h24116081/GETA reprocution/GETA-reproduction/geta/only_train_once/quantization/quant_layers.py", line 499, in forward
+    return nn.functional.linear(input_, weight, self.bias)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: mat1 and mat2 shapes cannot be multiplied (3072x1008 and 3072x768)
+
+20:47:35 | INFO | [SAVE] config -> ./phase4_out/config.json
+20:47:35 | INFO | [OK] Phase 4 complete. Log: /home/h24116081/GETA reprocution/GETA-reproduction/bert_geta_mvp/logs/phase4_20260416_202232.log
