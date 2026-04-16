@@ -1,0 +1,54 @@
+17:35:31 | INFO | [log] writing to /home/h24116081/GETA reprocution/GETA-reproduction/bert_geta_mvp/logs/phase4_20260416_173519.log
+17:35:31 | INFO | [env] torch=2.5.1+cu121  device=cuda
+17:35:31 | INFO | [cfg] train_samples=2000  val_samples=500  epochs=3  batch_size=8  lr=3e-05  lr_quant=0.0001  target_sparsity=0.5  bit_reduction=2
+17:35:31 | INFO | [M1] loading BERT QA + tokenizer
+17:35:41 | INFO | [M1] done
+17:35:41 | INFO | [M2] model_to_quantize_model
+17:35:42 | INFO | [M2] done
+17:35:42 | INFO | [M3] building OTO graph
+17:36:36 | INFO | [M3] done
+17:36:36 | INFO | [M3+] marked word_embeddings unprunable
+17:36:36 | INFO | [DATA] loading SQuAD
+17:36:44 | INFO | [DATA] train features=2054  val features=520  raw val examples=500
+17:36:44 | INFO | [SCHED] steps_per_epoch=257  total_steps=771  start_pruning=77  pruning_steps=192
+17:36:44 | INFO | [M4] building GETA optimizer
+17:36:44 | INFO | [M4] GETA optimizer built, 26 param groups
+17:36:44 | INFO | [EVAL] baseline (before training)
+17:37:07 | INFO | [EVAL] baseline EM=0.00  F1=3.62
+17:37:07 | INFO | [TRAIN] starting
+17:39:35 | INFO |     step 50  loss=5.9519  grp_sparsity=0.000  norm_import=42581.73  norm_redund=0.00
+17:42:13 | INFO |     step 100  loss=5.9516  grp_sparsity=0.050  norm_import=39338.27  norm_redund=1722.70
+17:44:58 | INFO |     step 150  loss=5.9509  grp_sparsity=0.150  norm_import=35669.97  norm_redund=1845.04
+17:47:49 | INFO |     step 200  loss=5.9484  grp_sparsity=0.300  norm_import=29922.78  norm_redund=1789.85
+17:50:42 | INFO |     step 250  loss=5.9357  grp_sparsity=0.450  norm_import=23990.83  norm_redund=1978.41
+17:51:05 | INFO | [EPOCH 1/3] avg_loss=5.9301  grp_sparsity=0.450  n_import=18504  n_redund=18504
+17:51:47 | INFO | [EVAL epoch 1] EM=1.00  F1=6.77
+17:54:13 | INFO |     step 300  loss=5.5775  grp_sparsity=0.500  norm_import=23991.79  norm_redund=0.00
+17:56:58 | INFO |     step 350  loss=5.4220  grp_sparsity=0.500  norm_import=23992.50  norm_redund=0.00
+17:59:45 | INFO |     step 400  loss=5.3208  grp_sparsity=0.500  norm_import=23993.12  norm_redund=0.00
+18:02:31 | INFO |     step 450  loss=5.2464  grp_sparsity=0.500  norm_import=23993.41  norm_redund=0.00
+18:05:18 | INFO |     step 500  loss=5.1783  grp_sparsity=0.500  norm_import=23993.57  norm_redund=0.00
+18:06:05 | INFO | [EPOCH 2/3] avg_loss=5.1670  grp_sparsity=0.500  n_import=18504  n_redund=18504
+18:06:47 | INFO | [EVAL epoch 2] EM=0.20  F1=6.07
+18:08:46 | INFO |     step 550  loss=4.8591  grp_sparsity=0.500  norm_import=23993.76  norm_redund=0.00
+18:11:33 | INFO |     step 600  loss=4.8079  grp_sparsity=0.500  norm_import=23993.85  norm_redund=0.00
+18:14:21 | INFO |     step 650  loss=4.7930  grp_sparsity=0.500  norm_import=23993.93  norm_redund=0.00
+18:17:08 | INFO |     step 700  loss=4.7554  grp_sparsity=0.500  norm_import=23994.01  norm_redund=0.00
+18:19:55 | INFO |     step 750  loss=4.7255  grp_sparsity=0.500  norm_import=23994.02  norm_redund=0.00
+18:21:05 | INFO | [EPOCH 3/3] avg_loss=4.7078  grp_sparsity=0.500  n_import=18504  n_redund=18504
+18:21:47 | INFO | [EVAL epoch 3] EM=3.80  F1=8.33
+18:21:47 | INFO | [SUBNET] constructing compressed model
+18:21:49 | INFO | [SUBNET] full model  : ./phase4_out/BertForQuestionAnswering_full_group_sparse.pt
+18:21:49 | INFO | [SUBNET] compressed  : ./phase4_out/BertForQuestionAnswering_compressed.pt
+18:21:49 | INFO | [METRICS] full BOPs=1584923.8M  params=94.66M
+18:21:50 | ERROR | [SUBNET] failed: RuntimeError: mat1 and mat2 shapes cannot be multiplied (3072x943 and 3072x768)
+18:21:50 | ERROR | ^^^^^^^^^^
+  File "/home/h24116081/miniconda3/lib/python3.13/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/h24116081/GETA reprocution/GETA-reproduction/geta/only_train_once/quantization/quant_layers.py", line 499, in forward
+    return nn.functional.linear(input_, weight, self.bias)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: mat1 and mat2 shapes cannot be multiplied (3072x943 and 3072x768)
+
+18:21:50 | INFO | [SAVE] config -> ./phase4_out/config.json
+18:21:50 | INFO | [OK] Phase 4 complete. Log: /home/h24116081/GETA reprocution/GETA-reproduction/bert_geta_mvp/logs/phase4_20260416_173519.log
