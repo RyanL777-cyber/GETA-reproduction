@@ -1,0 +1,33 @@
+01:18:03 | INFO | [log] writing to /home/h24116081/GETA reprocution/GETA-reproduction/bert_geta_mvp/logs/phase4_20260417_011802.log
+01:18:03 | INFO | [env] torch=2.5.1+cu121  device=cuda
+01:18:03 | INFO | [cfg] train_samples=2000  val_samples=500  epochs=1  batch_size=8  lr=3e-05  lr_quant=0.0001  target_sparsity=0.5  bit_reduction=2
+01:18:03 | INFO | [M1] loading BERT QA + tokenizer
+01:18:06 | INFO | [M1] done
+01:18:06 | INFO | [M2] model_to_quantize_model
+01:18:07 | INFO | [M2] done
+01:18:07 | INFO | [M3] building OTO graph
+01:19:04 | INFO | [M3] done
+01:19:04 | INFO | [M3+] marked word_embeddings unprunable
+01:19:04 | INFO | [DATA] loading SQuAD
+01:19:10 | INFO | [DATA] train features=2054  val features=520  raw val examples=500
+01:19:10 | INFO | [SCHED] steps_per_epoch=257  total_steps=257  start_pruning=25  pruning_steps=64
+01:19:10 | INFO | [M4] building GETA optimizer
+01:19:10 | INFO | [M4] GETA optimizer built, 26 param groups
+01:19:10 | INFO | [EVAL] baseline (before training)
+01:19:19 | INFO | [EVAL] baseline EM=0.00  F1=5.07
+01:19:19 | INFO | [TRAIN] starting
+01:19:50 | INFO |     step 50  loss=5.9526  grp_sparsity=0.200  norm_import=33791.86  norm_redund=1895.18
+01:20:24 | INFO |     step 100  loss=5.9531  grp_sparsity=0.500  norm_import=23938.20  norm_redund=0.00
+01:20:57 | INFO |     step 150  loss=5.9524  grp_sparsity=0.500  norm_import=23937.89  norm_redund=0.00
+01:21:29 | INFO |     step 200  loss=5.9503  grp_sparsity=0.500  norm_import=23937.71  norm_redund=0.00
+01:22:01 | INFO |     step 250  loss=5.9360  grp_sparsity=0.500  norm_import=23938.55  norm_redund=0.00
+01:22:05 | INFO | [EPOCH 1/1] avg_loss=5.9297  grp_sparsity=0.500  n_import=18504  n_redund=18504
+01:22:14 | INFO | [EVAL epoch 1] EM=0.20  F1=4.35
+01:22:14 | INFO | [SUBNET] constructing compressed model
+01:22:15 | INFO | [SUBNET] full model  : ./phase4_out/BertForQuestionAnswering_full_group_sparse.pt
+01:22:15 | INFO | [SUBNET] compressed  : ./phase4_out/BertForQuestionAnswering_compressed.pt
+01:22:15 | INFO | [METRICS] full BOPs=1321373.6M  params=80.45M
+01:22:23 | INFO | [EVAL compressed] EM=0.20  F1=4.35
+01:22:23 | INFO | [SAVE] predictions -> ./phase4_out/predictions.json
+01:22:23 | INFO | [SAVE] config -> ./phase4_out/config.json
+01:22:23 | INFO | [OK] Phase 4 complete. Log: /home/h24116081/GETA reprocution/GETA-reproduction/bert_geta_mvp/logs/phase4_20260417_011802.log
