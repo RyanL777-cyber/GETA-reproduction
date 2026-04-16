@@ -21,3 +21,5 @@ checkpoint-*/
 Thumbs.db
 .vscode/
 .idea/
+
+*.pt
