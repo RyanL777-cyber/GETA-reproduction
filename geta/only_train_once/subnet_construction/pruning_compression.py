@@ -177,6 +177,55 @@ def automated_pruning_compression(oto_graph, model, merge_lora_to_base, unmerge_
     # for name, param in model.named_parameters():
     #     print(name, param.shape)
 
+    # ---- Workaround: fix orphaned in-dim for linear layers whose incoming
+    #      edges were lost during tracing (e.g. QuantizeLinear FFN output.dense
+    #      in BERT). Build a map from each intermediate/up-projection module to
+    #      its node_group's pruning_redundant_idxes, then patch any downstream
+    #      linear whose in_features no longer matches. ----
+    import re as _re
+
+    # Collect out-dim pruned info: module -> (new_out_features, pruning_redundant_idxes)
+    _outdim_info = {}
+    for ng in oto_graph.node_groups.values():
+        if not ng.is_prunable and not ng.is_auxiliary:
+            continue
+        if ng.pruning_redundant_idxes is None or len(ng.pruning_redundant_idxes) == 0:
+            continue
+        for node in ng.nodes.values():
+            if hasattr(node.op, 'module') and hasattr(node.op.module, 'out_features'):
+                _outdim_info[node.op.module] = ng.pruning_redundant_idxes
+
+    # Build name -> module map
+    _name_to_module = {name: mod for name, mod in model.named_modules()}
+
+    # For each linear module that was NOT in-dim pruned, check if a paired
+    # upstream module was out-dim pruned and patch accordingly.
+    _ffn_pattern = _re.compile(r'^(.*\.layer\.\d+)\.output\.dense$')
+    for mod_name, mod in _name_to_module.items():
+        m = _ffn_pattern.match(mod_name)
+        if not m:
+            continue
+        layer_prefix = m.group(1)
+        inter_name = f"{layer_prefix}.intermediate.dense"
+        inter_mod = _name_to_module.get(inter_name)
+        if inter_mod is None:
+            continue
+        # Check mismatch: output.dense.in_features should == intermediate.dense.out_features
+        if not hasattr(mod, 'in_features') or not hasattr(inter_mod, 'out_features'):
+            continue
+        if mod.in_features == inter_mod.out_features:
+            continue  # already consistent
+        if inter_mod not in _outdim_info:
+            continue
+        pruned_idxes = _outdim_info[inter_mod]
+        ori_in = mod.in_features
+        preserved = sorted(set(range(ori_in)) - set(pruned_idxes))
+        mod.in_features = len(preserved)
+        mod.weight = torch.nn.Parameter(mod.weight.data[:, preserved])
+        if hasattr(mod, 'weight_clip_val') and hasattr(mod.weight_clip_val, 'data'):
+            pass  # clip_val is scalar, no dim to prune
+        # print(f"[workaround] {mod_name}: in_features {ori_in} -> {mod.in_features}")
+
     if merge_lora_to_base:
         if hasattr(model, 'merge_and_unload'):
             model = model.merge_and_unload()
