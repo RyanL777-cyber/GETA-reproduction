@@ -1,6 +1,11 @@
-# M4 Duplicate Param Groups — 完整事件記錄
+# GETA × BERT 重現事件記錄
 
 寫給事後要解釋給別人（或未來的自己）用。按時間線排，看完能跟人講清楚「為什麼 BERT × GETA 會炸、我們怎麼找到真正的 bug、最後怎麼修」。
+
+目前記錄的 bug：
+- **Bug #1** (§1-7)：M4 duplicate param groups（Phase 3 發現）— `graph.py` dedup 字典序把 layer.0 head 群清空。
+- **Bug #2** (§9)：construct_subnet FFN in-dim 未同步（Phase 4 發現）— QuantizeLinear 破壞 trace 邊 → `output.dense` 孤立。
+- **Bug #3** (§10)：projection_period_duration ZeroDivisionError（Phase 5 發現）— `oto.geta()` 的 `projection_steps` 預設值耦合不清。
 
 ---
 
@@ -304,18 +309,85 @@ Phase 4 重跑（1 epoch, 2000 train）：
 
 ---
 
-## 10. 未確認的事項（Phase 5 要盯）
+## 10. Bug #3：projection_period_duration ZeroDivisionError（Phase 5 發現）
+
+### 10.1 症狀
+
+Phase 5 第一次執行（sparsity=0.1, epochs=10, batch_size=4）在 `optimizer.step()` 第一步就爆：
+
+```
+File "geta/only_train_once/optimizer/geta.py", line 867, in step
+    if (
+        self.num_steps - self.start_projection_step - 1
+    ) % self.projection_period_duration == 0 and (
+ZeroDivisionError: integer modulo by zero
+```
+
+### 10.2 診斷
+
+`geta.py:64`：
+
+```python
+self.projection_period_duration = (
+    self.projection_steps // self.projection_periods
+)
+```
+
+`oto.geta()` 預設 `projection_steps=1`, `projection_periods=1`。Phase 5 為了重現 paper Kp=6 傳了 `projection_periods=6`，但沒傳 `projection_steps` → `1 // 6 = 0` → div-zero。
+
+`step()` 內的 projection 判斷（line 862-866）：
+
+```python
+if (
+    self.num_steps >= self.start_projection_step
+    and self.num_steps <= self.start_pruning_step
+    and self.start_projection_step != self.start_pruning_step
+):
+```
+
+只要 `start_projection_step (預設 0) != start_pruning_step`，從第一步就會進入 projection 判斷 → 觸發 `% self.projection_period_duration` → 除零。
+
+Phase 4 沒中是因為它根本沒傳 `projection_periods`，走預設 `1 // 1 = 1` 不會除零。
+
+### 10.3 Root cause
+
+作者 API 設計問題：`projection_steps` 和 `projection_periods` 必須配套設定，但 `oto.geta()` 預設值 `(1, 1)` 只在「兩個都不傳」時安全。文件沒說明這個耦合，只傳其一就炸。
+
+Projection phase 的語意是在 `[start_projection_step, start_pruning_step]` 這段區間內，每 `projection_period_duration` 步把 `max_bit_wt` 減 `bit_reduction`。Paper 設定 Kp=6, br=2, min/max bit = 4/16 → 預期 6 次縮減 (16→14→12→10→8→6→4)。
+
+### 10.4 修正（已套用，`bert_geta_phase5/run_experiment.py`）
+
+在呼叫 `oto.geta()` 前把 `projection_steps` 算對：
+
+```python
+start_projection_step = 0
+projection_steps = max(args.projection_periods, start_pruning_step - start_projection_step)
+# Kp=6, start_pruning_step=period_len=36885 → projection_period_duration = 6147
+```
+
+意圖：讓 projection phase 覆蓋整個 warmup 期（pruning 開始前），每 `period_len / Kp` 步縮一次 bit，剛好 6 次把 16 壓到 4。
+
+### 10.5 侷限
+
+這是 caller 層的修補，沒改 GETA 內部。Upstream 應該：
+- 要嘛在 `__init__` 檢查 `projection_periods > projection_steps` 直接報錯（而不是讓 `//` 靜默產生 0 再在 step 炸）；
+- 要嘛改 `step()` 的 guard，跟 pruning 一樣加 `and self.projection_period_duration != 0`（pruning 側已有此 guard 在 line 879）。
+
+---
+
+## 11. 未確認的事項（Phase 5 要盯）
 
 1. ~~**修完 dedup 後 27 groups 是否都保留**~~ → ✅ 已確認（§8.2），實際為 26 groups（一個 271-param group 被 trunk 吞併，不影響訓練）。
 2. ~~**修完 dedup 後 smoke.py 是否還通**~~ → ✅ 已確認（`smoke_20260416_171244.log`）。
 3. ~~**construct_subnet shape mismatch**~~ → ✅ 已修（§9，workaround 在 `pruning_compression.py`）。
-4. **正式訓練的 EM/F1** 達到 paper Table 3 多少（Phase 5 的最終正確性判定）。
-5. **`attention.output.LayerNorm` 為何沒重複** —— 猜測是被吸收進 attention 群內部，沒掛到 trunk 上，但未驗證。
-6. **是否應該把這兩個 bug report 提給 GETA upstream** —— graph.py dedup 排序 + pruning_compression in-dim 孤立節點。
+4. ~~**projection_period_duration div-zero**~~ → ✅ 已修（§10，caller 層補 `projection_steps`）。
+5. **正式訓練的 EM/F1** 達到 paper Table 3 多少（Phase 5 的最終正確性判定）。
+6. **`attention.output.LayerNorm` 為何沒重複** —— 猜測是被吸收進 attention 群內部，沒掛到 trunk 上，但未驗證。
+7. **是否應該把這三個 bug report 提給 GETA upstream** —— graph.py dedup 排序 + pruning_compression in-dim 孤立節點 + geta.py projection_steps 預設值。
 
 ---
 
-## 10. 檔案對照
+## 12. 檔案對照
 
 | 檔案 | 用途 |
 |------|------|
@@ -329,4 +401,7 @@ Phase 4 重跑（1 epoch, 2000 train）：
 | `geta/only_train_once/subnet_construction/pruning_compression.py` | `construct_subnet` 本體，Bug #2 workaround 在第二遍 in-dim pruning 之後 |
 | `bug_analysis/check_indim.py` | Bug #2 診斷 script，backward trace + group overlap 檢查 |
 | `bug_analysis/check_subnet.py` | Bug #2 診斷 script，compressed model shape 比對 |
+| `geta/only_train_once/optimizer/geta.py:64,867` | Bug #3 root：`projection_period_duration = projection_steps // projection_periods`，step() 沒 guard |
+| `bert_geta_phase5/run_experiment.py` | Phase 5 主腳本，Bug #3 的 caller 層修正在 M4 build optimizer 前 |
+| `bert_geta_phase5/results/phase5_20260417_020405.log` | Bug #3 首次觸發 log（ZeroDivisionError 堆疊） |
 | `geta_knowledge/open_questions.md` Q9 | 這個 bug 的開放問題條目 |

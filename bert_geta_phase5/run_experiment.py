@@ -328,10 +328,16 @@ def run_single(sparsity, args, tokenizer, raw_val, train_ds, val_ds, log):
     period_len = total_steps // args.pruning_periods if args.pruning_periods > 0 else total_steps
     start_pruning_step = max(1, period_len)  # after 1 period warmup
     pruning_steps = max(1, period_len * (args.pruning_periods - 1))  # remaining periods
+    # Projection phase runs in [start_projection_step, start_pruning_step],
+    # reducing bit-width br per projection_period. projection_steps must be
+    # >= projection_periods or period_duration = projection_steps // projection_periods = 0.
+    start_projection_step = 0
+    projection_steps = max(args.projection_periods, start_pruning_step - start_projection_step)
 
     log.info(f"[SCHED] steps/epoch={steps_per_epoch}  total={total_steps}  "
              f"start_prune={start_pruning_step}  prune_steps={pruning_steps}  "
-             f"prune_periods={args.pruning_periods}  proj_periods={args.projection_periods}")
+             f"prune_periods={args.pruning_periods}  proj_periods={args.projection_periods}  "
+             f"proj_steps={projection_steps}")
 
     # --- M4: GETA optimizer ---
     log.info("[M4] building GETA optimizer")
@@ -340,10 +346,12 @@ def run_single(sparsity, args, tokenizer, raw_val, train_ds, val_ds, log):
         lr=args.lr,
         lr_quant=args.lr_quant,
         target_group_sparsity=sparsity,
+        start_projection_step=start_projection_step,
+        projection_steps=projection_steps,
+        projection_periods=args.projection_periods,
         start_pruning_step=start_pruning_step,
         pruning_steps=pruning_steps,
         pruning_periods=args.pruning_periods,
-        projection_periods=args.projection_periods,
         bit_reduction=args.bit_reduction,
         min_bit_wt=4,
         max_bit_wt=16,
