@@ -73,6 +73,11 @@ os.environ["TOKENIZERS_PARALLELISM"] = "false"
 import torch
 import numpy as np
 
+# --- Performance: TF32 + cudnn autotuner (safe on Ampere+ GPUs, ~1.3-1.5x) ---
+torch.backends.cuda.matmul.allow_tf32 = True
+torch.backends.cudnn.allow_tf32 = True
+torch.backends.cudnn.benchmark = True
+
 import transformers
 import datasets as hf_datasets
 transformers.logging.set_verbosity_error()
@@ -100,6 +105,8 @@ def parse_args():
     p.add_argument("--projection_periods", type=int, default=6, help="paper Kp=6")
     p.add_argument("--seed", type=int, default=42)
     p.add_argument("--out_root", type=str, default="./results")
+    p.add_argument("--eval_last_n", type=int, default=None,
+                    help="only evaluate during last N epochs to save time (default: every epoch)")
     return p.parse_args()
 
 
@@ -398,20 +405,30 @@ def run_single(sparsity, args, tokenizer, raw_val, train_ds, val_ds, log):
         else:
             avg_loss = epoch_loss / max(n_batches, 1)
             metrics = optimizer.compute_metrics()
-
-            # Eval
-            em, f1, _ = evaluate(model, raw_val, val_ds, args.batch_size * 4)
             elapsed = (time.time() - t_start) / 60
-            log.info(f"[EPOCH {epoch}/{args.epochs}] loss={avg_loss:.4f}  "
-                     f"grp_sp={metrics.group_sparsity:.3f}  "
-                     f"EM={em:.2f}  F1={f1:.2f}  elapsed={elapsed:.1f}min")
 
-            if f1 > best_f1:
-                best_f1, best_epoch = f1, epoch
+            eval_last_n = args.eval_last_n if args.eval_last_n is not None else args.epochs
+            do_eval = (epoch > args.epochs - eval_last_n)
+            if do_eval:
+                em, f1, _ = evaluate(model, raw_val, val_ds, args.batch_size * 4)
+                log.info(f"[EPOCH {epoch}/{args.epochs}] loss={avg_loss:.4f}  "
+                         f"grp_sp={metrics.group_sparsity:.3f}  "
+                         f"EM={em:.2f}  F1={f1:.2f}  elapsed={elapsed:.1f}min")
+                if f1 > best_f1:
+                    best_f1, best_epoch = f1, epoch
+            else:
+                log.info(f"[EPOCH {epoch}/{args.epochs}] loss={avg_loss:.4f}  "
+                         f"grp_sp={metrics.group_sparsity:.3f}  "
+                         f"(eval skipped)  elapsed={elapsed:.1f}min")
             continue
         break
 
     log.info(f"[TRAIN] done. best F1={best_f1:.2f} at epoch {best_epoch}")
+
+    # --- Capture actual group sparsity (lost after construct_subnet) ---
+    final_metrics = optimizer.compute_metrics()
+    actual_group_sparsity = float(final_metrics.group_sparsity)
+    log.info(f"[FINAL] target sparsity={sparsity}  actual={actual_group_sparsity:.4f}")
 
     # --- construct_subnet ---
     log.info("[SUBNET] constructing compressed model")
@@ -444,6 +461,7 @@ def run_single(sparsity, args, tokenizer, raw_val, train_ds, val_ds, log):
     # --- Save results ---
     result = {
         "sparsity": sparsity,
+        "actual_group_sparsity": actual_group_sparsity,
         "seed": args.seed,
         "epochs": args.epochs,
         "batch_size": args.batch_size,
@@ -502,9 +520,10 @@ def main():
     log.info(f"\n{'='*60}")
     log.info("  SUMMARY")
     log.info(f"{'='*60}")
-    log.info(f"  {'Sparsity':>10}  {'EM':>8}  {'F1':>8}  {'BOPs(M)':>10}  {'Params(M)':>10}")
+    log.info(f"  {'Target':>8}  {'Actual':>8}  {'EM':>8}  {'F1':>8}  {'BOPs(M)':>10}  {'Params(M)':>10}")
     for r in all_results:
-        log.info(f"  {r['sparsity']:>10.0%}  {r['compressed_em']:>8.2f}  {r['compressed_f1']:>8.2f}  "
+        log.info(f"  {r['sparsity']:>8.0%}  {r['actual_group_sparsity']:>8.4f}  "
+                 f"{r['compressed_em']:>8.2f}  {r['compressed_f1']:>8.2f}  "
                  f"{r['bops_million']:>10.1f}  {r['params_million']:>10.2f}")
 
     # Save summary
