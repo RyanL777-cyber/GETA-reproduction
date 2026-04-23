@@ -2,13 +2,13 @@
 
 > **更新規則**：每次對話結束、或完成一個可驗收的步驟，更新這份。不要把狀態留在對話歷史裡。
 
-**Last updated**: 2026-04-23
+**Last updated**: 2026-04-24
 
 ---
 
 ## 目前在哪
 
-**Phase 4.5（新增）**：補對照驗證。Phase 5 四個 sparsity 全崩，回頭發現 Phase 4 驗收標準只測「不當機」、沒測訓練能否收斂，需要補兩個對照組定位失敗層。
+**Phase 4.5 完成**：兩個對照組都跑完了，**問題定位在 Quant wrap**。下一步是診斷 `only_train_once/quantization/` 內部。
 
 Phase 3（介面打通）跟 Phase 4（規模測試）都還算過關，但 **Phase 4 的 F1=4.35 當時被當作「不當機=pass」放過去**，這個訊號現在回頭看就是 Phase 5 崩潰的早期徵兆。
 
@@ -39,29 +39,35 @@ Log: `bert_geta_phase5/results/phase5_20260418_175634.log` 等 4 份
 
 ---
 
+## Phase 4.5 結果（2026-04-24）
+
+| Exp | 設定 | Epoch 2 F1 | 判定 |
+|---|---|---|---|
+| A | Quant wrap + 純 AdamW（無 GETA）| 27.33 | ❌ FAIL |
+| B | Quant wrap + GETA(sp=0) | 28.70 | ❌ FAIL |
+| bert_baseline 參考 | 無 quant wrap + AdamW | 88.50 | ✅ |
+
+Log:
+- `bert_geta_phase4_5/results_exp_a/exp_a_20260423_204616.log`
+- `bert_geta_phase4_5/results_exp_b/exp_b_20260423_204646.log`
+
+**結論**：
+1. A 跟 baseline 的唯一差異是 quant wrap → **quant wrap 是兇手**（F1 88→27）
+2. A ≈ B（F1 差 1.4 分）→ GETA optimizer dense 部分是乾淨的，行為跟純 AdamW 幾乎一樣
+3. Phase 5 的崩潰 = 「量化後本來就殘的模型」再被剪枝擊垮
+
+---
+
 ## 下一步
 
-**跑 Phase 4.5 兩個對照組**（在 server 上）：
+診斷 `geta/only_train_once/quantization/`：
 
-```bash
-cd ~/GETA\ reprocution/GETA-reproduction/bert_geta_phase4_5
+1. 查 `quant_model.py` 的 `model_to_quantize_model`——哪些層被包？embedding 有沒有被誤包？
+2. 查 `quant_layers.py` 的 `QuantLinear` forward/backward（STE 有沒有接對）
+3. 確認 `QuantizationMode.WEIGHT_AND_ACTIVATION` 的初始 bit 寬度（如果起始就低於 16-bit，forward 會直接失真）
+4. 寫 `exp_c_quantwrap_diagnostic.py` 做即時對比：wrap 前/後同一 input 的 logit 差異、所有 quant layer 的 scale/zero_point、1-step backward 後的 grad norm
 
-# Exp A — Quant wrap ✅, GETA ❌（純 AdamW + linear warmup）
-python3 exp_a_quantwrap_adamw.py
-
-# Exp B — Quant wrap ✅, GETA ✅ 但 target_sparsity=0
-python3 exp_b_geta_sp0.py
-```
-
-兩個都是 2 epochs full SQuAD，約 2h/run。建議 tmux 或 nohup。
-
-**解讀表**見 `bert_geta_phase4_5/notes.md`。摘要：
-
-| Exp A | Exp B | 結論 |
-|---|---|---|
-| ❌ | — | 問題在 quant wrap |
-| ✅ | ❌ | 問題在 GETA optimizer dense 部分（非 pruning） |
-| ✅ | ✅ | 問題在 pruning path，回 Phase 5 查 group zero-out 動態 |
+Loss 鎖在 3.2 而不是 0.7 的量級差異，指向量化 range 或 STE 梯度問題。
 
 ---
 
@@ -71,7 +77,7 @@ python3 exp_b_geta_sp0.py
 - ⚠️ **Phase 3 smoke**：`bert_geta_mvp/logs/smoke_20260416_171244.log`，只驗 M1-M5 2 batch 不當機，**沒測訓練收斂**
 - ⚠️ **Phase 4 小規模**：`bert_geta_mvp/logs/phase4_20260417_011802.log`，1 epoch 跑完不當機，但 **loss 5.93→5.93、F1=4.35，實際上沒學到東西**。驗收標準過低，這個訊號當時被放過
 - ❌ **Phase 5**：全面崩潰（見上表）
-- 🔄 **Phase 4.5**：已寫好 script，待 server 執行
+- ✅ **Phase 4.5**：已完成，定位問題在 Quant wrap（見上節）
 
 ---
 
