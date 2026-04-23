@@ -1,0 +1,18 @@
+{
+  "sparsity": 0.5,
+  "actual_group_sparsity": 0.49999999999986494,
+  "seed": 42,
+  "epochs": 10,
+  "batch_size": 4,
+  "lr": 3e-05,
+  "lr_quant": 0.0001,
+  "bit_reduction": 2,
+  "pruning_periods": 6,
+  "projection_periods": 6,
+  "best_f1": 48.961202589035636,
+  "best_epoch": 1,
+  "compressed_em": 0.42573320719016083,
+  "compressed_f1": 4.2222728188990395,
+  "bops_million": 709985.507120382,
+  "params_million": 80.452976
+}
