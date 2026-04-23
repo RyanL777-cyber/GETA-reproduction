@@ -58,16 +58,64 @@ Log:
 
 ---
 
-## 下一步
+## Exp C 診斷結果（2026-04-24）
 
-診斷 `geta/only_train_once/quantization/`：
+Script: `bert_geta_phase4_5/exp_c_quantwrap_diagnostic.py`（<1 min 跑完）
 
-1. 查 `quant_model.py` 的 `model_to_quantize_model`——哪些層被包？embedding 有沒有被誤包？
-2. 查 `quant_layers.py` 的 `QuantLinear` forward/backward（STE 有沒有接對）
-3. 確認 `QuantizationMode.WEIGHT_AND_ACTIVATION` 的初始 bit 寬度（如果起始就低於 16-bit，forward 會直接失真）
-4. 寫 `exp_c_quantwrap_diagnostic.py` 做即時對比：wrap 前/後同一 input 的 logit 差異、所有 quant layer 的 scale/zero_point、1-step backward 後的 grad norm
+**確認三個問題**：
 
-Loss 鎖在 3.2 而不是 0.7 的量級差異，指向量化 range 或 STE 梯度問題。
+1. **Activation quant 參數被用 weight 統計初始化（H1，主要元兇）**
+   - `initialize_quant_layer`（`quant_layers.py:436-440`）用 `max|weight|` 設 `q_m_act`
+   - 結果：`qm_act/max|x|` 中位數 0.33，最糟 0.004（量化範圍 = activation 範圍的 1/200）
+   - 平均 32% activation 被 saturate，qa_outputs 輸入 saturate 76%
+   - Wrapped logits std=0.015 vs dense std=0.222，輸出被壓扁 15×
+
+2. **STE 前後向不對應**
+   - `SymQuantizerNonLinear.backward` 只在 `|x|>=clip_val(2.0)` 歸零梯度
+   - 但 forward 在 `|x|>=q_m_act`（常 << 2）就已經 saturate 成常數
+   - 中間那段區域 forward 常數、backward 當 identity 傳 → 梯度 4 數量級不平衡
+
+3. **梯度雪崩不平衡**
+   - L0.output.dense: `|grad|/|W|=13.5`（爆炸）
+   - L11.att.query: `|grad|/|W|=8.8e-4`（等同不訓練）
+   - 差 ~15,000 倍，配合 lr=3e-5，上層根本沒動
+
+**被否決**：H2（`clip_val=(-2,2)` 砍梯度）——gradZero% 平均只 0.3%，不是主因。
+
+---
+
+## 修法實作完成（2026-04-24）
+
+Fix 實作：`bert_geta_phase4_5/quant_fix.py`
+- `apply_ste_fix()` — monkey-patch `SymQuantizerNonLinear.backward` 跟 `SymQuantizerLinear.backward`，讓 `|x| >= q_m` 的區域梯度歸零（跟 forward 的 saturate 對齊）
+- `calibrate_quant_layers(model, batches)` — 暫時把 activation quant 關掉，hook 每個 `QuantizeLinear` 的 input 收集 `max|x|`，用 `max|x| * 1.05` 設 `q_m_act`
+- `wrap_quant_fixed(model, device, batches)` — 三件事的 convenience wrapper
+
+**不動 upstream GETA 原始檔**，全靠 monkey-patch。想回到原版只要不呼叫 `apply_ste_fix()` 即可。
+
+## 驗收順序（由快到慢）
+
+```bash
+cd ~/GETA\ reprocution/GETA-reproduction/bert_geta_phase4_5
+
+# 1. 單元測試（~10s，CPU）— 驗證 STE 跟 calibration 程式邏輯對
+python3 test_quant_fix.py
+
+# 2. 診斷（~1 min）— 重跑 Exp C 的診斷，看 sat% / qm_act / grad balance
+python3 exp_c2_quantwrap_fixed_diagnostic.py
+#    驗收：sat% mean<5%、qm_act/max|x| min>=0.9、grad spread<100×、
+#          wrapped/dense std ratio >0.7
+
+# 3. 純 AdamW 全流程（~2h）— Exp A + fix
+python3 exp_d_quantwrap_fixed_adamw.py
+#    驗收：F1 >= 80（Exp A baseline 27.33）
+
+# 4. GETA dense 模式（~2h）— Exp B + fix
+python3 exp_e_quantwrap_fixed_geta_sp0.py
+#    驗收：F1 >= 80（Exp B baseline 28.70）
+```
+
+1 跟 2 都過就動 3；3 過了才動 4（省時間）。4 都過了代表量化那層已經乾淨，之後再跑有 pruning 的 Phase 5。
 
 ---
 
