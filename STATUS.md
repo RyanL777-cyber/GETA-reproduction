@@ -93,29 +93,48 @@ Fix 實作：`bert_geta_phase4_5/quant_fix.py`
 
 **不動 upstream GETA 原始檔**，全靠 monkey-patch。想回到原版只要不呼叫 `apply_ste_fix()` 即可。
 
-## 驗收順序（由快到慢）
+## Exp D / E 結果（2026-04-24）
+
+| Exp | 設定 | F1 | 判定 | 備註 |
+|---|---|---|---|---|
+| D | Quant wrap+fix + 純 AdamW + 16-bit | **88.26** | ✅ PASS | 貼近 baseline 88.50 |
+| E | Quant wrap+fix + GETA(sp=0) + 16→4-bit | **74.27** | ❌ FAIL | 但比 Exp B 的 28.70 進步 +45 |
+
+**Fix 完全有效**。Exp D 證明量化那層徹底乾淨。
+
+**Exp E 缺的 14 F1 來自 bit reduction**（不是 fix 有問題）：
+- step 0-7377（projection 階段前）loss 曲線跟 Exp D 完全一致（等資料量下 1.63 vs 1.63）
+- step 7377（projection 結束、bit 固定 4-bit）瞬間 loss 跳升 1.6→1.9 並鎖住
+- 剩下 83% 訓練都在 4-bit 下跑，2 epoch 不夠恢復
+
+Log: `results_exp_d/exp_d_20260424_042635.log`、`results_exp_e/exp_e_20260424_040115.log`
+
+---
+
+## 下一步（兩條路並行）
+
+**路線 A — 回頭跑 Phase 5（最終驗證）** ← 優先
+
+`bert_geta_phase5/run_experiment.py` 已改好：在 M2 加 `apply_ste_fix()`、在 M2 跟 M3 之間加 calibration pass（預設 8 batches × bs=4）。`quant_fix.py` 已複製到 phase5 資料夾內，self-contained。
+
+```bash
+cd ~/GETA\ reprocution/GETA-reproduction/bert_geta_phase5
+python3 run_experiment.py --sparsity 0.1 0.3 0.5 0.7
+# 可改 --calib_batches / --calib_batch_size 調整 calibration
+```
+
+Paper 跑 10 epoch，模型有 5× 時間在 4-bit 下 fine-tune 恢復。paper Table 3 F1 ≈ 84-87 就是 quant+prune 聯合結果，這才是最終對照。預期跑很久，建議 tmux。
+
+**路線 B — 隔離 bit reduction（可選，~2h）**
+
+`bert_geta_phase4_5/exp_f_geta_sp0_16bit.py` 已寫好：同 Exp E 但設 `min_bit_wt=max_bit_wt=16`（關閉 bit reduction）。
+- 若 F1 ≥ 85 → 14 分缺口全是 bit reduction 的代價，fix 無殘留問題
+- 若 F1 < 85 → GETA optimizer 另有問題需繼續隔離
 
 ```bash
 cd ~/GETA\ reprocution/GETA-reproduction/bert_geta_phase4_5
-
-# 1. 單元測試（~10s，CPU）— 驗證 STE 跟 calibration 程式邏輯對
-python3 test_quant_fix.py
-
-# 2. 診斷（~1 min）— 重跑 Exp C 的診斷，看 sat% / qm_act / grad balance
-python3 exp_c2_quantwrap_fixed_diagnostic.py
-#    驗收：sat% mean<5%、qm_act/max|x| min>=0.9、grad spread<100×、
-#          wrapped/dense std ratio >0.7
-
-# 3. 純 AdamW 全流程（~2h）— Exp A + fix
-python3 exp_d_quantwrap_fixed_adamw.py
-#    驗收：F1 >= 80（Exp A baseline 27.33）
-
-# 4. GETA dense 模式（~2h）— Exp B + fix
-python3 exp_e_quantwrap_fixed_geta_sp0.py
-#    驗收：F1 >= 80（Exp B baseline 28.70）
+python3 exp_f_geta_sp0_16bit.py
 ```
-
-1 跟 2 都過就動 3；3 過了才動 4（省時間）。4 都過了代表量化那層已經乾淨，之後再跑有 pruning 的 Phase 5。
 
 ---
 

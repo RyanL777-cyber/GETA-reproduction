@@ -107,6 +107,10 @@ def parse_args():
     p.add_argument("--out_root", type=str, default="./results")
     p.add_argument("--eval_last_n", type=int, default=None,
                     help="only evaluate during last N epochs to save time (default: every epoch)")
+    p.add_argument("--calib_batches", type=int, default=8,
+                    help="number of calibration batches for activation quant init")
+    p.add_argument("--calib_batch_size", type=int, default=4,
+                    help="calibration batch size")
     return p.parse_args()
 
 
@@ -310,12 +314,30 @@ def run_single(sparsity, args, tokenizer, raw_val, train_ds, val_ds, log):
     from transformers import AutoModelForQuestionAnswering
     model = AutoModelForQuestionAnswering.from_pretrained(MODEL_NAME).to(DEVICE)
 
-    # --- M2: quantize ---
-    log.info("[M2] quantize wrap")
+    # --- M2: quantize + STE fix (phase 4.5 fix) ---
+    log.info("[M2] quantize wrap + STE fix")
     from only_train_once.quantization.quant_model import model_to_quantize_model
     from only_train_once.quantization.quant_layers import QuantizationMode
+    from quant_fix import apply_ste_fix, calibrate_quant_layers
+    apply_ste_fix()
     model = model_to_quantize_model(model, quant_mode=QuantizationMode.WEIGHT_AND_ACTIVATION)
     model = model.to(DEVICE)
+
+    # --- M2.5: calibrate activation quant on real SQuAD batches ---
+    log.info(f"[CALIB] running {args.calib_batches} batches of bs={args.calib_batch_size}")
+    calib_batches = []
+    for i in range(args.calib_batches):
+        start = i * args.calib_batch_size
+        if start >= len(train_ds):
+            break
+        idx = list(range(start, start + args.calib_batch_size))
+        batch = train_ds[idx]
+        calib_batches.append({
+            k: torch.as_tensor(batch[k]).to(DEVICE)
+            for k in ("input_ids", "attention_mask", "token_type_ids")
+            if k in batch
+        })
+    calibrate_quant_layers(model, calib_batches, num_bits=16, log=log)
 
     # --- M3: OTO ---
     log.info("[M3] building OTO graph")
