@@ -1,0 +1,16 @@
+{
+  "exp": "E_quantwrap_fixed_geta_sp0",
+  "epochs": 2,
+  "batch_size": 4,
+  "lr": 3e-05,
+  "lr_quant": 0.0001,
+  "bit_reduction": 2,
+  "pruning_periods": 6,
+  "projection_periods": 6,
+  "seed": 42,
+  "num_bits": 16,
+  "best_f1": 74.26678302984728,
+  "best_epoch": 2,
+  "final_group_sparsity": 0.0,
+  "pass": false
+}

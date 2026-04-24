@@ -1,0 +1,5 @@
+03:58:07 | INFO | [env] device=cuda
+03:58:15 | INFO | [DATA] raw train=87599  raw val=10570
+03:58:15 | INFO | [DATA] train features=88524  val features=10784
+03:58:20 | INFO | [calib] 8 batches over 73 layers  (skipped=0)  num_bits=16  safety=1.05
+03:58:20 | INFO | [calib] observed max|x|: min=2.665  median=14.866  max=137.575

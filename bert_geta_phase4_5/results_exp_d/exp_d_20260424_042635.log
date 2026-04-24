@@ -1,0 +1,90 @@
+04:26:35 | INFO | [env] torch=2.5.1+cu121  device=cuda
+04:26:35 | INFO | [cfg] epochs=2  bs=12  lr=3e-05  wd=0.01  warmup=0.0  seed=42
+04:26:35 | INFO | [cfg] optimizer=AdamW (no GETA)  quant_wrap=ON+FIX  num_bits=16
+04:26:42 | INFO | [DATA] raw train=87599  raw val=10570
+04:26:42 | INFO | [DATA] train features=88524  val features=10784
+04:26:42 | INFO | [M1] loading BERT QA
+04:26:43 | INFO | [M2] quantize wrap + STE fix
+04:26:44 | INFO | [CALIB] running 8 batches of bs=4
+04:26:45 | INFO | [calib] 8 batches over 73 layers  (skipped=0)  num_bits=16  safety=1.05
+04:26:45 | INFO | [calib] observed max|x|: min=2.665  median=14.866  max=137.556
+04:26:45 | INFO | [SCHED] steps/epoch=7377  total=14754  warmup=0
+04:26:45 | INFO | [TRAIN] starting
+04:29:02 | INFO |     step 200  loss=3.1395  lr=2.96e-05
+04:31:21 | INFO |     step 400  loss=2.5110  lr=2.92e-05
+04:33:38 | INFO |     step 600  loss=2.2141  lr=2.88e-05
+04:35:57 | INFO |     step 800  loss=2.0532  lr=2.84e-05
+04:38:14 | INFO |     step 1000  loss=1.9370  lr=2.80e-05
+04:40:31 | INFO |     step 1200  loss=1.8445  lr=2.76e-05
+04:42:50 | INFO |     step 1400  loss=1.7742  lr=2.72e-05
+04:45:07 | INFO |     step 1600  loss=1.7194  lr=2.67e-05
+04:47:25 | INFO |     step 1800  loss=1.6690  lr=2.63e-05
+04:49:43 | INFO |     step 2000  loss=1.6290  lr=2.59e-05
+04:52:00 | INFO |     step 2200  loss=1.5964  lr=2.55e-05
+04:54:19 | INFO |     step 2400  loss=1.5671  lr=2.51e-05
+04:56:36 | INFO |     step 2600  loss=1.5419  lr=2.47e-05
+04:58:52 | INFO |     step 2800  loss=1.5186  lr=2.43e-05
+05:01:08 | INFO |     step 3000  loss=1.4940  lr=2.39e-05
+05:03:27 | INFO |     step 3200  loss=1.4759  lr=2.35e-05
+05:05:45 | INFO |     step 3400  loss=1.4558  lr=2.31e-05
+05:08:03 | INFO |     step 3600  loss=1.4371  lr=2.27e-05
+05:10:21 | INFO |     step 3800  loss=1.4215  lr=2.23e-05
+05:12:37 | INFO |     step 4000  loss=1.4069  lr=2.19e-05
+05:14:54 | INFO |     step 4200  loss=1.3939  lr=2.15e-05
+05:17:12 | INFO |     step 4400  loss=1.3790  lr=2.11e-05
+05:19:28 | INFO |     step 4600  loss=1.3659  lr=2.06e-05
+05:21:46 | INFO |     step 4800  loss=1.3536  lr=2.02e-05
+05:24:03 | INFO |     step 5000  loss=1.3425  lr=1.98e-05
+05:26:21 | INFO |     step 5200  loss=1.3333  lr=1.94e-05
+05:28:38 | INFO |     step 5400  loss=1.3246  lr=1.90e-05
+05:30:55 | INFO |     step 5600  loss=1.3152  lr=1.86e-05
+05:33:12 | INFO |     step 5800  loss=1.3053  lr=1.82e-05
+05:35:30 | INFO |     step 6000  loss=1.2972  lr=1.78e-05
+05:37:46 | INFO |     step 6200  loss=1.2865  lr=1.74e-05
+05:40:02 | INFO |     step 6400  loss=1.2801  lr=1.70e-05
+05:42:18 | INFO |     step 6600  loss=1.2734  lr=1.66e-05
+05:44:31 | INFO |     step 6800  loss=1.2677  lr=1.62e-05
+05:46:44 | INFO |     step 7000  loss=1.2611  lr=1.58e-05
+05:48:59 | INFO |     step 7200  loss=1.2550  lr=1.54e-05
+05:53:30 | INFO | [EPOCH 1/2] loss=1.2497  EM=80.14  F1=87.40  elapsed=84.2min
+05:53:45 | INFO |     step 7400  loss=0.7624  lr=1.50e-05
+05:56:00 | INFO |     step 7600  loss=0.7275  lr=1.45e-05
+05:58:16 | INFO |     step 7800  loss=0.7446  lr=1.41e-05
+06:00:33 | INFO |     step 8000  loss=0.7356  lr=1.37e-05
+06:02:48 | INFO |     step 8200  loss=0.7396  lr=1.33e-05
+06:05:04 | INFO |     step 8400  loss=0.7390  lr=1.29e-05
+06:07:19 | INFO |     step 8600  loss=0.7410  lr=1.25e-05
+06:09:35 | INFO |     step 8800  loss=0.7399  lr=1.21e-05
+06:11:51 | INFO |     step 9000  loss=0.7409  lr=1.17e-05
+06:14:05 | INFO |     step 9200  loss=0.7375  lr=1.13e-05
+06:16:21 | INFO |     step 9400  loss=0.7375  lr=1.09e-05
+06:18:38 | INFO |     step 9600  loss=0.7363  lr=1.05e-05
+06:20:54 | INFO |     step 9800  loss=0.7346  lr=1.01e-05
+06:23:10 | INFO |     step 10000  loss=0.7335  lr=9.67e-06
+06:25:24 | INFO |     step 10200  loss=0.7372  lr=9.26e-06
+06:27:40 | INFO |     step 10400  loss=0.7355  lr=8.85e-06
+06:29:57 | INFO |     step 10600  loss=0.7339  lr=8.45e-06
+06:32:12 | INFO |     step 10800  loss=0.7335  lr=8.04e-06
+06:34:28 | INFO |     step 11000  loss=0.7338  lr=7.63e-06
+06:36:43 | INFO |     step 11200  loss=0.7340  lr=7.23e-06
+06:38:58 | INFO |     step 11400  loss=0.7328  lr=6.82e-06
+06:41:14 | INFO |     step 11600  loss=0.7340  lr=6.41e-06
+06:43:29 | INFO |     step 11800  loss=0.7326  lr=6.01e-06
+06:45:45 | INFO |     step 12000  loss=0.7326  lr=5.60e-06
+06:48:00 | INFO |     step 12200  loss=0.7307  lr=5.19e-06
+06:50:15 | INFO |     step 12400  loss=0.7310  lr=4.79e-06
+06:52:30 | INFO |     step 12600  loss=0.7305  lr=4.38e-06
+06:54:44 | INFO |     step 12800  loss=0.7296  lr=3.97e-06
+06:57:01 | INFO |     step 13000  loss=0.7289  lr=3.57e-06
+06:58:57 | INFO |     step 13200  loss=0.7286  lr=3.16e-06
+07:00:43 | INFO |     step 13400  loss=0.7287  lr=2.75e-06
+07:02:31 | INFO |     step 13600  loss=0.7280  lr=2.35e-06
+07:04:21 | INFO |     step 13800  loss=0.7274  lr=1.94e-06
+07:06:08 | INFO |     step 14000  loss=0.7260  lr=1.53e-06
+07:07:57 | INFO |     step 14200  loss=0.7263  lr=1.13e-06
+07:09:45 | INFO |     step 14400  loss=0.7258  lr=7.20e-07
+07:11:36 | INFO |     step 14600  loss=0.7259  lr=3.13e-07
+07:15:20 | INFO | [EPOCH 2/2] loss=0.7259  EM=80.79  F1=88.26  elapsed=166.2min
+07:15:20 | INFO | [TRAIN] done. best F1=88.26 at epoch 2
+07:15:20 | INFO | [VERDICT] PASS (threshold F1>=80)
+07:15:20 | INFO | [SAVE] ./results_exp_d/result.json

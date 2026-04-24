@@ -1,0 +1,13 @@
+{
+  "exp": "D_quantwrap_fixed_adamw",
+  "epochs": 2,
+  "batch_size": 12,
+  "lr": 3e-05,
+  "weight_decay": 0.01,
+  "warmup_ratio": 0.0,
+  "seed": 42,
+  "num_bits": 16,
+  "best_f1": 88.26393556130809,
+  "best_epoch": 2,
+  "pass": true
+}
