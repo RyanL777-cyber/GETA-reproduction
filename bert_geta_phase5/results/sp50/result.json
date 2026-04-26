@@ -9,10 +9,10 @@
   "bit_reduction": 2,
   "pruning_periods": 6,
   "projection_periods": 6,
-  "best_f1": 48.961202589035636,
+  "best_f1": 85.51116932131453,
   "best_epoch": 1,
-  "compressed_em": 0.42573320719016083,
-  "compressed_f1": 4.2222728188990395,
-  "bops_million": 709985.507120382,
+  "compressed_em": 65.12771996215704,
+  "compressed_f1": 76.2635632001112,
+  "bops_million": 1124641.2304990864,
   "params_million": 80.452976
 }
