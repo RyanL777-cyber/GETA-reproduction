@@ -6,12 +6,18 @@
 # out any block you don't want this round. Each call writes to its own
 # results/<exp_tag>_sp<NN>/ directory so multiple experiments coexist safely.
 #
-# Cost reference (phase 5 baseline ~5.5h / epoch on one GPU):
-#   3-epoch sp10 single GPU ~17h
-#   10-epoch sp* single GPU ~55h
-#   Stage A (7 expts at 3 ep, 4 GPUs in parallel) ~30h wall time
-#   Stage B (3 expts at 10 ep, 3 GPUs in parallel) ~55h wall time
-#   Stage C (4 sp at 10 ep, 4 GPUs in parallel)    ~55h wall time
+# Cost reference (phase 5 baseline ~5.5h / epoch on full SQuAD, one GPU):
+#   Stage A: 10% data + 1000 val, 3 epoch x 7 expts
+#            -> ~33min/epoch x 3 = ~1.7h/expt; 4 GPUs in parallel ~3h wall
+#   Stage B: 10% data + 1000 val, 10 epoch x 3 expts
+#            -> ~33min/epoch x 10 = ~5.5h/expt; 3 GPUs in parallel ~5.5h wall
+#   Stage C: FULL data, 10 epoch x 4 sparsities
+#            -> ~55h/expt; 4 GPUs in parallel ~55h wall (the real reproduction)
+#
+# Total wall time (default STAGES=AB then C separately): ~3h + ~5.5h = ~8.5h
+# for diagnostic; ~55h for final reproduction. Diagnostic numbers are NOT
+# directly comparable to paper Table 3 (subset data) — they are for trend
+# detection only (does F1 crash? does it recover?).
 #
 # Run patterns:
 #   bash run_all_exps.sh                                 # foreground
@@ -62,13 +68,15 @@ if [[ "$STAGES" == *A* ]]; then
     # A0 — control: reproduce phase 5 result exactly (sanity check).
     # Expect: F1 crashes from ~85 (ep1) to ~70 (ep2).
     _run A0_control \
-        --sparsity 0.1 --epochs 3 --eval_last_n 3
+        --sparsity 0.1 --epochs 3 --eval_last_n 3 \
+        --train_subset_frac 0.1 --val_subset_n 1000
 
     # A1 — disable weight bit reduction (audit's primary verifier).
     # min=max=16 → GETA never lowers bit width.
     # Expect: F1 stays ~85 across all 3 epochs.
     _run A1_no_bitreduce \
         --sparsity 0.1 --epochs 3 --eval_last_n 3 \
+        --train_subset_frac 0.1 --val_subset_n 1000 \
         --min_bit_wt 16 --max_bit_wt 16
 
     # A2 — slow projection: pruning starts at ep 2.5 (vs ~1.67 baseline).
@@ -76,18 +84,21 @@ if [[ "$STAGES" == *A* ]]; then
     # Expect: gentler F1 dip + better recovery.
     _run A2_slowproj \
         --sparsity 0.1 --epochs 3 --eval_last_n 3 \
+        --train_subset_frac 0.1 --val_subset_n 1000 \
         --start_pruning_epoch 2.5
 
     # A3 — LR scheduler only (linear warmup + decay), no schedule changes.
     # Expect: helps recovery, not a full fix.
     _run A3_lrsched \
         --sparsity 0.1 --epochs 3 --eval_last_n 3 \
+        --train_subset_frac 0.1 --val_subset_n 1000 \
         --lr_scheduler linear --warmup_ratio 0.1
 
     # A4 — bit_reduction=1 (smaller bit step per period).
     # 16→15→14→… vs 16→14→12→…. Same total, smoother curve.
     _run A4_br1 \
         --sparsity 0.1 --epochs 3 --eval_last_n 3 \
+        --train_subset_frac 0.1 --val_subset_n 1000 \
         --bit_reduction 1
 
     # A5 — calibrate at 4-bit instead of 16-bit.
@@ -95,12 +106,14 @@ if [[ "$STAGES" == *A* ]]; then
     # have no effect; cheap sanity check that the audit is right.
     _run A5_calib4 \
         --sparsity 0.1 --epochs 3 --eval_last_n 3 \
+        --train_subset_frac 0.1 --val_subset_n 1000 \
         --calib_num_bits 4
 
     # A6 — 16x more calibration samples (32 → 512).
     # Tests whether calibration sample size matters.
     _run A6_bigcalib \
         --sparsity 0.1 --epochs 3 --eval_last_n 3 \
+        --train_subset_frac 0.1 --val_subset_n 1000 \
         --calib_batches 64 --calib_batch_size 8
 
     wait
@@ -118,17 +131,20 @@ if [[ "$STAGES" == *B* ]]; then
     # B1 — slow projection + LR scheduler (default best guess)
     _run B1_slowproj_lrsched \
         --sparsity 0.1 --epochs 10 \
+        --train_subset_frac 0.1 --val_subset_n 1000 \
         --start_pruning_epoch 5 \
         --lr_scheduler linear --warmup_ratio 0.1
 
     # B2 — slow projection only (isolate scheduler contribution)
     _run B2_slowproj_only \
         --sparsity 0.1 --epochs 10 \
+        --train_subset_frac 0.1 --val_subset_n 1000 \
         --start_pruning_epoch 5
 
     # B3 — slow projection + LR scheduler + bit_reduction=1
     _run B3_full \
         --sparsity 0.1 --epochs 10 \
+        --train_subset_frac 0.1 --val_subset_n 1000 \
         --start_pruning_epoch 5 \
         --lr_scheduler linear --warmup_ratio 0.1 \
         --bit_reduction 1

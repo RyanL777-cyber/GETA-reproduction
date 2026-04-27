@@ -142,6 +142,10 @@ def parse_args():
                     help="warmup fraction of total steps when --lr_scheduler=linear")
     p.add_argument("--exp_tag", type=str, default="",
                     help="prefix for output dir; results/<tag>_sp<NN>/")
+    p.add_argument("--train_subset_frac", type=float, default=1.0,
+                    help="fraction of training set to use (1.0=full; 0.1 for diagnostic runs)")
+    p.add_argument("--val_subset_n", type=int, default=None,
+                    help="cap validation set to this many examples (None=full ~10570)")
     return p.parse_args()
 
 
@@ -223,10 +227,19 @@ def prepare_validation_features(examples, tokenizer):
     return inputs
 
 
-def load_squad(tokenizer, log):
+def load_squad(tokenizer, log, train_subset_frac=1.0, val_subset_n=None):
     raw_train = hf_datasets.load_dataset("squad", split="train")
     raw_val = hf_datasets.load_dataset("squad", split="validation")
     log.info(f"[DATA] raw train={len(raw_train)}  raw val={len(raw_val)}")
+
+    # Phase 4.9: optional subsetting for diagnostic runs (Stage A/B)
+    if train_subset_frac < 1.0:
+        n_keep = max(1, int(len(raw_train) * train_subset_frac))
+        raw_train = raw_train.shuffle(seed=42).select(range(n_keep))
+        log.info(f"[DATA] train subsetted to {n_keep} ({train_subset_frac:.0%})")
+    if val_subset_n is not None and val_subset_n < len(raw_val):
+        raw_val = raw_val.select(range(val_subset_n))
+        log.info(f"[DATA] val subsetted to {val_subset_n}")
 
     train_ds = raw_train.map(
         lambda ex: prepare_train_features(ex, tokenizer),
@@ -589,6 +602,8 @@ def run_single(sparsity, args, tokenizer, raw_val, train_ds, val_ds, log):
         "pruning_end_epoch": args.pruning_end_epoch,
         "lr_scheduler": args.lr_scheduler,
         "warmup_ratio": args.warmup_ratio,
+        "train_subset_frac": args.train_subset_frac,
+        "val_subset_n": args.val_subset_n,
         "best_f1": best_f1,
         "best_epoch": best_epoch,
         "final_f1": final_f1,
@@ -630,7 +645,11 @@ def main():
     # --- Tokenizer + data (load once, reuse across sparsity levels) ---
     from transformers import AutoTokenizer
     tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
-    raw_val, train_ds, val_ds = load_squad(tokenizer, log)
+    raw_val, train_ds, val_ds = load_squad(
+        tokenizer, log,
+        train_subset_frac=args.train_subset_frac,
+        val_subset_n=args.val_subset_n,
+    )
 
     # --- Run experiments ---
     all_results = []
