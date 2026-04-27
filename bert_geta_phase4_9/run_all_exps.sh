@@ -1,45 +1,66 @@
 #!/usr/bin/env bash
 # =========================================================================
-# Phase 4.9 experiment matrix
+# Phase 4.9 EXPERIMENT matrix (NOT the final reproduction)
 # =========================================================================
-# Source of truth for what to run. Each `_run` call is one experiment; comment
-# out any block you don't want this round. Each call writes to its own
-# results/<exp_tag>_sp<NN>/ directory so multiple experiments coexist safely.
+# Diagnostic + recovery experiments only. The final 4-sparsity 10-epoch
+# reproduction belongs in a separate script when we're ready to commit.
 #
-# Cost reference (phase 5 baseline ~5.5h / epoch on full SQuAD, one GPU):
-#   Stage A: 10% data + 1000 val, 3 epoch x 7 expts
-#            -> ~33min/epoch x 3 = ~1.7h/expt; 4 GPUs in parallel ~3h wall
-#   Stage B: 10% data + 1000 val, 10 epoch x 3 expts
-#            -> ~33min/epoch x 10 = ~5.5h/expt; 3 GPUs in parallel ~5.5h wall
-#   Stage C: FULL data, 10 epoch x 4 sparsities
-#            -> ~55h/expt; 4 GPUs in parallel ~55h wall (the real reproduction)
+# Stage A: 7 diagnostic runs (sp10, 3 epoch, 10% data, 1000 val)
+#          Goal: identify the intervention that fixes the epoch-2 F1 crash.
+#          Wall time: ~3h on 4 GPUs in parallel.
 #
-# Total wall time (default STAGES=AB then C separately): ~3h + ~5.5h = ~8.5h
-# for diagnostic; ~55h for final reproduction. Diagnostic numbers are NOT
-# directly comparable to paper Table 3 (subset data) — they are for trend
-# detection only (does F1 crash? does it recover?).
+# Stage B: 3 recovery runs (sp10, 10 epoch, 10% data, 1000 val)
+#          Goal: pick the winning recipe before final reproduction.
+#          Wall time: ~5.5h on 3 GPUs in parallel.
 #
-# Run patterns:
-#   bash run_all_exps.sh                                 # foreground
-#   nohup bash run_all_exps.sh > run_all.log 2>&1 &      # background
+# All numbers are TREND ONLY — not comparable to paper Table 3 (subset data).
 #
-# To run only one stage:
+# =========================================================================
+# USAGE
+# =========================================================================
+#
+#   # Default: auto-select GPUs (one per job), runs A then B
+#   bash run_all_exps.sh
+#
+#   # Run only one stage
 #   STAGES=A bash run_all_exps.sh
 #   STAGES=B bash run_all_exps.sh
-#   STAGES=AB bash run_all_exps.sh
+#
+#   # Pin to specific GPUs (round-robin assignment).
+#   # If you have 7 idle GPUs, each Stage-A job gets its own:
+#   GPUS=0,1,2,3,4,5,6 STAGES=A bash run_all_exps.sh
+#
+#   # Or 8 GPUs across A (7 jobs) + spillover ignored:
+#   GPUS=0,1,2,3,4,5,6,7 bash run_all_exps.sh
+#
+#   # Run in background:
+#   nohup bash run_all_exps.sh > run_all.log 2>&1 &
+#
 # =========================================================================
 
 set -u
 cd "$(dirname "$0")"
 
-STAGES="${STAGES:-AB}"   # default: A then B; add C only after picking winner
-SLEEP_BETWEEN=15         # seconds between parallel launches (so auto-GPU
-                         # selection has time to see the previous job's
-                         # memory usage and pick a different GPU)
+STAGES="${STAGES:-AB}"
+GPUS="${GPUS:-}"          # comma-separated list, e.g. "0,1,2,3,4,5,6"
+SLEEP_BETWEEN=20          # seconds between parallel launches (auto-GPU mode
+                          # needs this to avoid two jobs grabbing same GPU)
+
+# Parse GPUS env var into an array; empty array → use auto-select
+if [[ -n "$GPUS" ]]; then
+    IFS=',' read -ra GPU_LIST <<< "$GPUS"
+    echo "[gpu] round-robin across: ${GPU_LIST[*]}"
+else
+    GPU_LIST=()
+    echo "[gpu] auto-select mode (one idle GPU per job, sleep ${SLEEP_BETWEEN}s between launches)"
+fi
+
+mkdir -p results
+GPU_IDX=0
 
 _run() {
     local tag="$1"; shift
-    # Extract --sparsity value (first one if multiple) for stdout filename
+    # Extract --sparsity for stdout filename
     local sp=""
     local args=("$@")
     for ((i=0; i<${#args[@]}; i++)); do
@@ -49,68 +70,67 @@ _run() {
         fi
     done
     local logname="${tag}${sp}"
-    echo "=== launching ${logname} ($(date '+%F %T')) ==="
-    nohup python run_experiment.py "$@" --exp_tag "$tag" \
-        > "results/${logname}.stdout.log" 2>&1 &
-    sleep "$SLEEP_BETWEEN"
+
+    if [[ ${#GPU_LIST[@]} -gt 0 ]]; then
+        # Round-robin pin
+        local gpu="${GPU_LIST[$((GPU_IDX % ${#GPU_LIST[@]}))]}"
+        GPU_IDX=$((GPU_IDX + 1))
+        echo "=== launching ${logname} on GPU ${gpu} ($(date '+%F %T')) ==="
+        CUDA_VISIBLE_DEVICES="$gpu" nohup python run_experiment.py "$@" --exp_tag "$tag" \
+            > "results/${logname}.stdout.log" 2>&1 &
+    else
+        # Auto-select
+        echo "=== launching ${logname} (auto GPU) ($(date '+%F %T')) ==="
+        nohup python run_experiment.py "$@" --exp_tag "$tag" \
+            > "results/${logname}.stdout.log" 2>&1 &
+        sleep "$SLEEP_BETWEEN"
+    fi
 }
 
-mkdir -p results
-
 # =========================================================================
-# STAGE A — diagnostic verification (sp10, 3 epochs, 7 experiments)
-# Goal: identify which intervention fixes the epoch-2 F1 crash.
-# Launch all in parallel; auto-GPU picks idle GPUs round-robin.
+# STAGE A — diagnostic verification (sp10, 3 epoch, 10% data)
 # =========================================================================
 if [[ "$STAGES" == *A* ]]; then
-    echo ">>> STAGE A: 7 diagnostic runs (sp10, 3 epochs each)"
+    echo ">>> STAGE A: 7 diagnostic runs (sp10, 3 epoch, 10% data)"
 
-    # A0 — control: reproduce phase 5 result exactly (sanity check).
-    # Expect: F1 crashes from ~85 (ep1) to ~70 (ep2).
+    # A0 — control: same recipe as phase 5 (small dataset version)
+    # Expect: F1 still drops ep1 → ep2 (proportionally, not absolute 85→70)
     _run A0_control \
         --sparsity 0.1 --epochs 3 --eval_last_n 3 \
         --train_subset_frac 0.1 --val_subset_n 1000
 
-    # A1 — disable weight bit reduction (audit's primary verifier).
-    # min=max=16 → GETA never lowers bit width.
-    # Expect: F1 stays ~85 across all 3 epochs.
+    # A1 — disable weight bit reduction (audit's primary verifier)
+    # Expect: F1 monotonically rising or flat across all 3 epochs
     _run A1_no_bitreduce \
         --sparsity 0.1 --epochs 3 --eval_last_n 3 \
         --train_subset_frac 0.1 --val_subset_n 1000 \
         --min_bit_wt 16 --max_bit_wt 16
 
-    # A2 — slow projection: pruning starts at ep 2.5 (vs ~1.67 baseline).
-    # Projection has more room for 16→4 walk before pruning kicks in.
-    # Expect: gentler F1 dip + better recovery.
+    # A2 — slow projection (delay pruning to ep 2.5)
     _run A2_slowproj \
         --sparsity 0.1 --epochs 3 --eval_last_n 3 \
         --train_subset_frac 0.1 --val_subset_n 1000 \
         --start_pruning_epoch 2.5
 
-    # A3 — LR scheduler only (linear warmup + decay), no schedule changes.
-    # Expect: helps recovery, not a full fix.
+    # A3 — LR scheduler only (linear warmup + decay)
     _run A3_lrsched \
         --sparsity 0.1 --epochs 3 --eval_last_n 3 \
         --train_subset_frac 0.1 --val_subset_n 1000 \
         --lr_scheduler linear --warmup_ratio 0.1
 
-    # A4 — bit_reduction=1 (smaller bit step per period).
-    # 16→15→14→… vs 16→14→12→…. Same total, smoother curve.
+    # A4 — bit_reduction=1 (smaller bit step per period)
     _run A4_br1 \
         --sparsity 0.1 --epochs 3 --eval_last_n 3 \
         --train_subset_frac 0.1 --val_subset_n 1000 \
         --bit_reduction 1
 
-    # A5 — calibrate at 4-bit instead of 16-bit.
-    # Audit says activation projection is OFF in geta.py, so this should
-    # have no effect; cheap sanity check that the audit is right.
+    # A5 — calibrate at 4-bit (audit says shouldn't matter)
     _run A5_calib4 \
         --sparsity 0.1 --epochs 3 --eval_last_n 3 \
         --train_subset_frac 0.1 --val_subset_n 1000 \
         --calib_num_bits 4
 
-    # A6 — 16x more calibration samples (32 → 512).
-    # Tests whether calibration sample size matters.
+    # A6 — 16x more calibration samples
     _run A6_bigcalib \
         --sparsity 0.1 --epochs 3 --eval_last_n 3 \
         --train_subset_frac 0.1 --val_subset_n 1000 \
@@ -121,21 +141,19 @@ if [[ "$STAGES" == *A* ]]; then
 fi
 
 # =========================================================================
-# STAGE B — combined recovery (sp10, 10 epochs, 3 combos)
-# Goal: pick the winning recipe before committing to a 4-sparsity sweep.
-# Each ~55h on one GPU; running all 3 in parallel → ~55h wall.
+# STAGE B — combined recovery (sp10, 10 epoch, 10% data)
 # =========================================================================
 if [[ "$STAGES" == *B* ]]; then
-    echo ">>> STAGE B: 3 recovery runs (sp10, 10 epochs each)"
+    echo ">>> STAGE B: 3 recovery runs (sp10, 10 epoch, 10% data)"
 
-    # B1 — slow projection + LR scheduler (default best guess)
+    # B1 — slow projection + LR scheduler
     _run B1_slowproj_lrsched \
         --sparsity 0.1 --epochs 10 \
         --train_subset_frac 0.1 --val_subset_n 1000 \
         --start_pruning_epoch 5 \
         --lr_scheduler linear --warmup_ratio 0.1
 
-    # B2 — slow projection only (isolate scheduler contribution)
+    # B2 — slow projection only
     _run B2_slowproj_only \
         --sparsity 0.1 --epochs 10 \
         --train_subset_frac 0.1 --val_subset_n 1000 \
@@ -153,26 +171,4 @@ if [[ "$STAGES" == *B* ]]; then
     echo ">>> STAGE B complete ($(date '+%F %T'))"
 fi
 
-# =========================================================================
-# STAGE C — final 4-sparsity sweep (10 epochs, 4 GPUs in parallel)
-# Edit flags below to match the winning B* combo before running.
-# =========================================================================
-if [[ "$STAGES" == *C* ]]; then
-    echo ">>> STAGE C: 4-sparsity sweep with winning combo (10 epochs each)"
-
-    for SP in 0.1 0.3 0.5 0.7; do
-        _run C1_winner \
-            --sparsity $SP --epochs 10 \
-            --start_pruning_epoch 5 \
-            --lr_scheduler linear --warmup_ratio 0.1
-    done
-
-    wait
-    echo ">>> STAGE C complete ($(date '+%F %T'))"
-fi
-
-# =========================================================================
-# Post-processing (run after all stages)
-# =========================================================================
-# python build_table.py --results_dir ./results --out ./results/table3.md
 echo "ALL STAGES DONE ($(date '+%F %T'))"
