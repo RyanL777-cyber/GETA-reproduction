@@ -1,0 +1,71 @@
+19:00:22 | INFO | [log] ./results/phase5_20260427_190022.log
+19:00:22 | INFO | [env] torch=2.5.1+cu121  device=cuda
+19:00:22 | INFO | [cfg] sparsity=[0.1]  epochs=3  bs=4  lr=3e-05  lr_quant=0.0001  br=1  P=6  Kp=6  seed=42119:00:30 | INFO | [DATA] raw train=87599  raw val=10570
+19:00:30 | INFO | [DATA] train subsetted to 8759 (10%)
+19:00:30 | INFO | [DATA] val subsetted to 1000119:00:48 | INFO | [DATA] train features=8848  val features=1020
+19:00:48 | INFO | 
+============================================================
+19:00:48 | INFO |   EXPERIMENT: sparsity=0.1  tag=A0_control_sp10
+19:00:48 | INFO | ============================================================
+19:00:48 | INFO | [M1] loading BERT QA
+19:00:51 | INFO | [M2] quantize wrap + STE 19:019:00:55 | INFO | [CALIB] running 8 batches of b19:0119:14:11 | INFO | [calib] 64 batches over 73 layers  (skipped=0)  num_bits=16  safety=1.05
+19:14:11 | INFO | [calib] observed max|x|: min=3.340  median=14.910  max=141.487
+19:14:11 | INFO | [M3] building OTO graph
+19:15:54 | INFO | [SCHED] steps/epoch=2212  total=6636  start_prune=1106 (0.50 ep)  prune_steps=5530 (2.50 ep)  prune_periods=6  proj_periods=6  proj_steps=1106 (0.50 ep)
+19:15:54 | INFO | [BIT]   min_bit_wt=4  max_bit_wt=16  bit_reduction=2  calib_num_bits=16
+19:15:54 | INFO | [LR]    scheduler=none  warmup_ratio=0.1  lr=3e-05  lr_quant=0.0001
+19:15:54 | INFO | [M4] building GETA optimizer
+19:15:54 | INFO | [M4] GETA optimizer built, 26 param groups
+19:15:54 | INFO | [TRAIN] startin1902:02:55 | INFO |     step 200  loss=4.1790  grp_sp=0.000  n_imp=37008  n_red=0
+08:37:36 | INFO |     step 400  loss=3.3909  grp_sp=0.000  n_imp=37008  n_red=0
+13:19:02 | INFO |     step 600  loss=2.9411  grp_sp=0.000  n_imp=37008  n_red=0
+16:54:04 | INFO |     step 800  loss=2.6881  grp_sp=0.000  n_imp=37008  n_red=0
+:03:58 | INFO |     step 1000  loss=2.6570  grp_sp=0.000  n_imp=37008  n_red=0
+20:18:16 | INFO |     step 1200  loss=2.8059  grp_sp=0.000  n_imp=36392  n_red=616
+20:31:44 | INFO |     step 1400  loss=3.0200  grp_sp=0.000  n_imp=36392  n_red=616
+20:44:32 | INFO |     step 1600  loss=3.1183  grp_sp=0.000  n_imp=36392  n_red=616
+20:59:30 | INFO |     step 1800  loss=3.1607  grp_sp=0.000  n_imp=36392  n_red=616
+21:12:13 | INFO |     step 2000  loss=3.1570  grp_sp=0.000  n_imp=36392  n_red=616
+21:26:08 | INFO |     step 2200  loss=3.1492  grp_sp=0.017  n_imp=35776  n_red=1232
+21:27:55 | INFO | [EPOCH 1/3] loss=3.1515  grp_sp=0.017  EM=28.50  F1=39.10  elapsed=143.6min
+21:41:32 | INFO |     step 2400  loss=2.5595  grp_sp=0.017  n_imp=35776  n_red=1232
+21:52:29 | INFO |     step 2600  loss=2.5696  grp_sp=0.017  n_imp=35776  n_red=1232
+22:04:30 | INFO |     step 2800  loss=2.6590  grp_sp=0.017  n_imp=35776  n_red=1232
+22:14:09 | INFO |     step 3000  loss=2.6286  grp_sp=0.033  n_imp=35160  n_red=1848
+22:26:54 | INFO |     step 3200  loss=2.6107  grp_sp=0.033  n_imp=35160  n_red=1848
+22:37:14 | INFO |     step 3400  loss=2.5713  grp_sp=0.033  n_imp=35160  n_red=1848
+22:50:15 | INFO |     step 3600  loss=2.5452  grp_sp=0.033  n_imp=35160  n_red=1848
+23:02:41 | INFO |     step 3800  loss=2.5452  grp_sp=0.033  n_imp=35160  n_red=1848
+23:14:33 | INFO |     step 4000  loss=2.5293  grp_sp=0.050  n_imp=34544  n_red=2464
+23:27:34 | INFO |     step 4200  loss=2.5135  grp_sp=0.050  n_imp=34544  n_red=2464
+23:38:08 | INFO |     step 4400  loss=2.4898  grp_sp=0.050  n_imp=34544  n_red=2464
+23:40:27 | INFO | [EPOCH 2/3] loss=2.4870  grp_sp=0.050  EM=46.60  F1=56.72  elapsed=276.2min
+23:52:15 | INFO |     step 4600  loss=1.7445  grp_sp=0.050  n_imp=34544  n_red=2464
+00:02:53 | INFO |     step 4800  loss=1.7973  grp_sp=0.067  n_imp=33928  n_red=3080
+00:16:04 | INFO |     step 5000  loss=1.8157  grp_sp=0.067  n_imp=33928  n_red=3080
+00:26:44 | INFO |     step 5200  loss=1.8240  grp_sp=0.067  n_imp=33928  n_red=3080
+00:39:28 | INFO |     step 5400  loss=1.8260  grp_sp=0.067  n_imp=33928  n_red=3080
+00:51:22 | INFO |     step 5600  loss=1.8346  grp_sp=0.067  n_imp=33928  n_red=3080
+01:03:17 | INFO |     step 5800  loss=1.8398  grp_sp=0.083  n_imp=33308  n_red=3700
+01:16:25 | INFO |     step 6000  loss=1.8329  grp_sp=0.083  n_imp=33308  n_red=3700
+01:27:14 | INFO |     step 6200  loss=1.8372  grp_sp=0.083  n_imp=33308  n_red=3700
+01:39:51 | INFO |     step 6400  loss=1.8455  grp_sp=0.083  n_imp=33308  n_red=3700
+01:50:20 | INFO |     step 6600  loss=1.8397  grp_sp=0.083  n_imp=33308  n_red=3700
+01:53:06 | INFO | [EPOCH 3/3] loss=1.8399  grp_sp=0.100  EM=46.70  F1=57.36  elapsed=408.9min
+01:53:06 | INFO | [TRAIN] done. best F1=57.36 @ ep3 (pre-compression)  final F1=57.36
+01:53:06 | INFO | [FINAL] target sparsity=0.1  actual=0.1000
+01:53:06 | INFO | [SUBNET] constructing compressed model
+01:53:09 | INFO | [SUBNET] full  : ./results/A0_control_sp10/BertForQuestionAnswering_full_group_sparse.pt
+01:53:09 | INFO | [SUBNET] comp  : ./results/A0_control_sp10/BertForQuestionAnswering_compressed.pt
+01:54:31 | INFO | [METRICS] BOPs=1815877.5M  params=103.21M
+01:54:31 | INFO | [EVAL compressed] EM=46.60  F1=57.30
+01:54:31 | INFO | [SAVE] results -> ./results/A0_control_sp10/
+01:54:31 | INFO | 
+============================================================
+01:54:31 | INFO |   SUMMARY
+01:54:31 | INFO | ============================================================
+01:54:31 | INFO |     Target    Actual      fEM      fF1      cEM      cF1     BOPs(M)   Params(M)
+01:54:31 | INFO |        10%    0.1000    46.70    57.36    46.60    57.30   1815877.5      103.21
+01:54:31 | INFO |   (fEM/fF1 = last-epoch eval before construct_subnet; cEM/cF1 = compressed model)
+01:54:31 | INFO | 
+[OK] Phase 5 complete. Results in ./results/

@@ -1,0 +1,53 @@
+{
+  "sparsity": 0.1,
+  "actual_group_sparsity": 0.099978383052286,
+  "exp_tag": "A0_control",
+  "seed": 42,
+  "epochs": 3,
+  "batch_size": 4,
+  "lr": 3e-05,
+  "lr_quant": 0.0001,
+  "bit_reduction": 2,
+  "pruning_periods": 6,
+  "projection_periods": 6,
+  "min_bit_wt": 4,
+  "max_bit_wt": 16,
+  "calib_num_bits": 16,
+  "start_pruning_epoch": null,
+  "pruning_end_epoch": null,
+  "lr_scheduler": "none",
+  "warmup_ratio": 0.1,
+  "train_subset_frac": 0.1,
+  "val_subset_n": 1000,
+  "best_f1": 57.36324108416522,
+  "best_epoch": 3,
+  "final_f1": 57.36324108416522,
+  "final_em": 46.7,
+  "compressed_em": 46.6,
+  "compressed_f1": 57.29693673633913,
+  "bops_million": 1815877.510987384,
+  "params_million": 103.206724,
+  "epoch_log": [
+    {
+      "epoch": 1,
+      "loss": 3.1514848118233636,
+      "grp_sp": 0.016645049718975184,
+      "em": 28.5,
+      "f1": 39.10021491439923
+    },
+    {
+      "epoch": 2,
+      "loss": 2.486950945196704,
+      "grp_sp": 0.049935149156925554,
+      "em": 46.6,
+      "f1": 56.71782719779438
+    },
+    {
+      "epoch": 3,
+      "loss": 1.8399373532608017,
+      "grp_sp": 0.099978383052286,
+      "em": 46.7,
+      "f1": 57.36324108416522
+    }
+  ]
+}

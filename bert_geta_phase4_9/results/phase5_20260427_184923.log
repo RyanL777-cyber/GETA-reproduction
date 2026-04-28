@@ -1,0 +1,22 @@
+18:49:23 | INFO | [log] ./results/phase5_20260427_184923.log
+18:49:23 | INFO | [env] torch=2.5.1+cu121  device=cuda
+18:49:23 | INFO | [cfg] sparsity=[0.7]  epochs=10  bs=4  lr=3e-05  lr_quant=0.0001  br=2  P=6  Kp=6  seed=42
+18:49:31 | INFO | [DATA] raw train=87599  raw val=10570
+18:49:31 | INFO | [DATA] train features=88524  val features=10784
+18:49:31 | INFO | 
+============================================================
+18:49:31 | INFO |   EXPERIMENT: sparsity=0.7  tag=C1_winner_sp70
+18:49:31 | INFO | ============================================================
+18:49:31 | INFO | [M1] loading BERT QA
+18:49:33 | INFO | [M2] quantize wrap + STE fix
+18:49:37 | INFO | [CALIB] running 8 batches of bs=4
+18:49:39 | INFO | [calib] 8 batches over 73 layers  (skipped=0)  num_bits=16  safety=1.05
+18:49:39 | INFO | [calib] observed max|x|: min=2.665  median=14.866  max=137.556
+18:49:39 | INFO | [M3] building OTO graph
+18:52:56 | INFO | [SCHED] steps/epoch=22131  total=221310  start_prune=110655 (5.00 ep)  prune_steps=184425 (8.33 ep)  prune_periods=6  proj_periods=6  proj_steps=110655 (5.00 ep)
+18:52:56 | INFO | [BIT]   min_bit_wt=4  max_bit_wt=16  bit_reduction=2  calib_num_bits=16
+18:52:56 | INFO | [LR]    scheduler=linear  warmup_ratio=0.1  lr=3e-05  lr_quant=0.0001
+18:52:56 | INFO | [M4] building GETA optimizer
+18:52:56 | INFO | [M4] GETA optimizer built, 26 param groups
+18:52:56 | INFO | [LR] linear schedule warmup=22131 decay over 199179
+18:52:56 | INFO | [TRAIN] starting

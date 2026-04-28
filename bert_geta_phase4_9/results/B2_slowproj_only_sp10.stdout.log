@@ -1,0 +1,256 @@
+[gpu] selected GPU 3 (util=0%, mem=1779MiB)
+18:48:20 | INFO | [log] ./results/phase5_20260427_184820.log
+18:48:20 | INFO | [env] torch=2.5.1+cu121  device=cuda
+18:48:20 | INFO | [cfg] sparsity=[0.1]  epochs=10  bs=4  lr=3e-05  lr_quant=0.0001  br=2  P=6  Kp=6  seed=42
+18:48:28 | INFO | [DATA] raw train=87599  raw val=10570
+18:48:28 | INFO | [DATA] train features=88524  val features=10784
+18:48:28 | INFO | 
+============================================================
+18:48:28 | INFO |   EXPERIMENT: sparsity=0.1  tag=B2_slowproj_only_sp10
+18:48:28 | INFO | ============================================================
+18:48:28 | INFO | [M1] loading BERT QA
+18:48:32 | INFO | [M2] quantize wrap + STE fix
+2026-04-27 18:48:32,073 - quant_fix - INFO - STE fix applied to SymQuantizerNonLinear and SymQuantizerLinear
+2026-04-27 18:48:34,417 - only_train_once.quantization.quant_model - INFO - Converted 73 layers to quantized versions
+18:48:34 | INFO | [CALIB] running 8 batches of bs=4
+18:48:36 | INFO | [calib] 8 batches over 73 layers  (skipped=0)  num_bits=16  safety=1.05
+18:48:36 | INFO | [calib] observed max|x|: min=2.665  median=14.866  max=137.556
+18:48:36 | INFO | [M3] building OTO graph
+/home/h24116081/miniconda3/lib/python3.13/site-packages/transformers/modeling_attn_mask_utils.py:196: TracerWarning: torch.tensor results are registered as constants in the trace. You can safely ignore this warning if you use this function to create tensors out of constant variables that would be the same every time you call this function. In any other case, this might cause the trace to be incorrect.
+  inverted_mask = torch.tensor(1.0, dtype=dtype) - expanded_mask
+/home/h24116081/GETA reprocution/GETA-reproduction/geta/only_train_once/quantization/quant_layers.py:334: TracerWarning: torch.tensor results are registered as constants in the trace. You can safely ignore this warning if you use this function to create tensors out of constant variables that would be the same every time you call this function. In any other case, this might cause the trace to be incorrect.
+  weight_clip_val = torch.tensor(self.weight_clip_val, device=weight.device)
+/home/h24116081/GETA reprocution/GETA-reproduction/geta/only_train_once/quantization/quant_layers.py:335: TracerWarning: torch.tensor results are registered as constants in the trace. You can safely ignore this warning if you use this function to create tensors out of constant variables that would be the same every time you call this function. In any other case, this might cause the trace to be incorrect.
+  q_s = torch.tensor(0.0, device=weight.device)
+/home/h24116081/GETA reprocution/GETA-reproduction/geta/only_train_once/quantization/quant_layers.py:361: TracerWarning: torch.tensor results are registered as constants in the trace. You can safely ignore this warning if you use this function to create tensors out of constant variables that would be the same every time you call this function. In any other case, this might cause the trace to be incorrect.
+  activation_clip_val = torch.tensor(self.act_clip_val, device=activation.device)
+/home/h24116081/GETA reprocution/GETA-reproduction/geta/only_train_once/quantization/quant_layers.py:362: TracerWarning: torch.tensor results are registered as constants in the trace. You can safely ignore this warning if you use this function to create tensors out of constant variables that would be the same every time you call this function. In any other case, this might cause the trace to be incorrect.
+  q_s = torch.tensor(0.0, device=activation.device)
+OTO graph constructor
+graph build
+NodePattern mul None
+NodePattern transpose None
+NodePattern matmul None
+Post-processing of graph completed.
+Graph has 1102 nodes and 1177 edges.
+18:51:24 | INFO | [SCHED] steps/epoch=22131  total=221310  start_prune=110655 (5.00 ep)  prune_steps=184425 (8.33 ep)  prune_periods=6  proj_periods=6  proj_steps=110655 (5.00 ep)
+18:51:24 | INFO | [BIT]   min_bit_wt=4  max_bit_wt=16  bit_reduction=2  calib_num_bits=16
+18:51:24 | INFO | [LR]    scheduler=none  warmup_ratio=0.1  lr=3e-05  lr_quant=0.0001
+18:51:24 | INFO | [M4] building GETA optimizer
+2026-04-27 18:51:24,241 - GETA - INFO - Setup GETA
+2026-04-27 18:51:24,241 - GETA - INFO - importance_score_criteria: {'magnitude': 0.2, 'avg_magnitude': 0.2, 'cosine_similarity': 0.2, 'taylor_first_order': 0.2, 'taylor_second_order': 0.2}
+2026-04-27 18:51:24,241 - GETA - INFO - start_projection_step: 0
+2026-04-27 18:51:24,241 - GETA - INFO - projection_steps: 110655
+2026-04-27 18:51:24,241 - GETA - INFO - projection_periods: 6
+2026-04-27 18:51:24,241 - GETA - INFO - start_pruning_step: 110655
+2026-04-27 18:51:24,241 - GETA - INFO - pruning_steps: 184425
+2026-04-27 18:51:24,241 - GETA - INFO - pruning_periods: 6
+2026-04-27 18:51:24,241 - GETA - INFO - pruning_period_duration: 30737
+2026-04-27 18:51:24,249 - GETA - INFO - Target redundant groups per period: [616, 616, 616, 616, 616, 620]
+18:51:24 | INFO | [M4] GETA optimizer built, 26 param groups
+18:51:24 | INFO | [TRAIN] starting
+18:58:07 | INFO |     step 200  loss=4.1785  grp_sp=0.000  n_imp=37008  n_red=0
+19:05:04 | INFO |     step 400  loss=3.4077  grp_sp=0.000  n_imp=37008  n_red=0
+19:11:51 | INFO |     step 600  loss=2.9894  grp_sp=0.000  n_imp=37008  n_red=0
+19:18:37 | INFO |     step 800  loss=2.7209  grp_sp=0.000  n_imp=37008  n_red=0
+19:25:30 | INFO |     step 1000  loss=2.5361  grp_sp=0.000  n_imp=37008  n_red=0
+19:32:10 | INFO |     step 1200  loss=2.4141  grp_sp=0.000  n_imp=37008  n_red=0
+19:38:45 | INFO |     step 1400  loss=2.3059  grp_sp=0.000  n_imp=37008  n_red=0
+19:45:33 | INFO |     step 1600  loss=2.2097  grp_sp=0.000  n_imp=37008  n_red=0
+19:52:05 | INFO |     step 1800  loss=2.1363  grp_sp=0.000  n_imp=37008  n_red=0
+19:58:38 | INFO |     step 2000  loss=2.0853  grp_sp=0.000  n_imp=37008  n_red=0
+20:05:13 | INFO |     step 2200  loss=2.0389  grp_sp=0.000  n_imp=37008  n_red=0
+20:12:01 | INFO |     step 2400  loss=1.9992  grp_sp=0.000  n_imp=37008  n_red=0
+20:18:36 | INFO |     step 2600  loss=1.9631  grp_sp=0.000  n_imp=37008  n_red=0
+20:24:28 | INFO |     step 2800  loss=1.9228  grp_sp=0.000  n_imp=37008  n_red=0
+20:30:23 | INFO |     step 3000  loss=1.8921  grp_sp=0.000  n_imp=37008  n_red=0
+20:36:23 | INFO |     step 3200  loss=1.8643  grp_sp=0.000  n_imp=37008  n_red=0
+20:42:31 | INFO |     step 3400  loss=1.8363  grp_sp=0.000  n_imp=37008  n_red=0
+20:48:35 | INFO |     step 3600  loss=1.8101  grp_sp=0.000  n_imp=37008  n_red=0
+20:54:51 | INFO |     step 3800  loss=1.7894  grp_sp=0.000  n_imp=37008  n_red=0
+21:00:51 | INFO |     step 4000  loss=1.7693  grp_sp=0.000  n_imp=37008  n_red=0
+21:07:22 | INFO |     step 4200  loss=1.7473  grp_sp=0.000  n_imp=37008  n_red=0
+21:13:36 | INFO |     step 4400  loss=1.7280  grp_sp=0.000  n_imp=37008  n_red=0
+21:20:08 | INFO |     step 4600  loss=1.7123  grp_sp=0.000  n_imp=37008  n_red=0
+21:26:35 | INFO |     step 4800  loss=1.6972  grp_sp=0.000  n_imp=37008  n_red=0
+21:33:10 | INFO |     step 5000  loss=1.6795  grp_sp=0.000  n_imp=37008  n_red=0
+21:39:39 | INFO |     step 5200  loss=1.6631  grp_sp=0.000  n_imp=37008  n_red=0
+21:46:15 | INFO |     step 5400  loss=1.6491  grp_sp=0.000  n_imp=37008  n_red=0
+21:52:49 | INFO |     step 5600  loss=1.6389  grp_sp=0.000  n_imp=37008  n_red=0
+21:59:31 | INFO |     step 5800  loss=1.6224  grp_sp=0.000  n_imp=37008  n_red=0
+22:06:14 | INFO |     step 6000  loss=1.6142  grp_sp=0.000  n_imp=37008  n_red=0
+22:13:17 | INFO |     step 6200  loss=1.5989  grp_sp=0.000  n_imp=37008  n_red=0
+22:20:04 | INFO |     step 6400  loss=1.5907  grp_sp=0.000  n_imp=37008  n_red=0
+22:26:58 | INFO |     step 6600  loss=1.5825  grp_sp=0.000  n_imp=37008  n_red=0
+22:33:56 | INFO |     step 6800  loss=1.5728  grp_sp=0.000  n_imp=37008  n_red=0
+22:40:37 | INFO |     step 7000  loss=1.5638  grp_sp=0.000  n_imp=37008  n_red=0
+22:47:16 | INFO |     step 7200  loss=1.5549  grp_sp=0.000  n_imp=37008  n_red=0
+22:53:56 | INFO |     step 7400  loss=1.5466  grp_sp=0.000  n_imp=37008  n_red=0
+23:00:53 | INFO |     step 7600  loss=1.5373  grp_sp=0.000  n_imp=37008  n_red=0
+23:07:43 | INFO |     step 7800  loss=1.5310  grp_sp=0.000  n_imp=37008  n_red=0
+23:14:29 | INFO |     step 8000  loss=1.5240  grp_sp=0.000  n_imp=37008  n_red=0
+23:21:22 | INFO |     step 8200  loss=1.5174  grp_sp=0.000  n_imp=37008  n_red=0
+23:28:06 | INFO |     step 8400  loss=1.5106  grp_sp=0.000  n_imp=37008  n_red=0
+23:34:52 | INFO |     step 8600  loss=1.5035  grp_sp=0.000  n_imp=37008  n_red=0
+23:41:58 | INFO |     step 8800  loss=1.4961  grp_sp=0.000  n_imp=37008  n_red=0
+23:48:51 | INFO |     step 9000  loss=1.4898  grp_sp=0.000  n_imp=37008  n_red=0
+23:55:30 | INFO |     step 9200  loss=1.4840  grp_sp=0.000  n_imp=37008  n_red=0
+00:02:38 | INFO |     step 9400  loss=1.4795  grp_sp=0.000  n_imp=37008  n_red=0
+00:10:27 | INFO |     step 9600  loss=1.4742  grp_sp=0.000  n_imp=37008  n_red=0
+00:17:55 | INFO |     step 9800  loss=1.4689  grp_sp=0.000  n_imp=37008  n_red=0
+00:24:59 | INFO |     step 10000  loss=1.4626  grp_sp=0.000  n_imp=37008  n_red=0
+00:32:08 | INFO |     step 10200  loss=1.4566  grp_sp=0.000  n_imp=37008  n_red=0
+00:39:37 | INFO |     step 10400  loss=1.4506  grp_sp=0.000  n_imp=37008  n_red=0
+00:46:37 | INFO |     step 10600  loss=1.4457  grp_sp=0.000  n_imp=37008  n_red=0
+00:53:21 | INFO |     step 10800  loss=1.4399  grp_sp=0.000  n_imp=37008  n_red=0
+01:00:12 | INFO |     step 11000  loss=1.4363  grp_sp=0.000  n_imp=37008  n_red=0
+01:06:58 | INFO |     step 11200  loss=1.4314  grp_sp=0.000  n_imp=37008  n_red=0
+01:14:00 | INFO |     step 11400  loss=1.4270  grp_sp=0.000  n_imp=37008  n_red=0
+01:21:05 | INFO |     step 11600  loss=1.4228  grp_sp=0.000  n_imp=37008  n_red=0
+01:28:05 | INFO |     step 11800  loss=1.4182  grp_sp=0.000  n_imp=37008  n_red=0
+01:35:10 | INFO |     step 12000  loss=1.4145  grp_sp=0.000  n_imp=37008  n_red=0
+01:42:18 | INFO |     step 12200  loss=1.4112  grp_sp=0.000  n_imp=37008  n_red=0
+01:49:33 | INFO |     step 12400  loss=1.4065  grp_sp=0.000  n_imp=37008  n_red=0
+01:56:43 | INFO |     step 12600  loss=1.4034  grp_sp=0.000  n_imp=37008  n_red=0
+02:04:17 | INFO |     step 12800  loss=1.3975  grp_sp=0.000  n_imp=37008  n_red=0
+02:12:05 | INFO |     step 13000  loss=1.3927  grp_sp=0.000  n_imp=37008  n_red=0
+02:19:00 | INFO |     step 13200  loss=1.3900  grp_sp=0.000  n_imp=37008  n_red=0
+02:25:48 | INFO |     step 13400  loss=1.3861  grp_sp=0.000  n_imp=37008  n_red=0
+02:32:59 | INFO |     step 13600  loss=1.3824  grp_sp=0.000  n_imp=37008  n_red=0
+02:39:28 | INFO |     step 13800  loss=1.3788  grp_sp=0.000  n_imp=37008  n_red=0
+02:45:53 | INFO |     step 14000  loss=1.3753  grp_sp=0.000  n_imp=37008  n_red=0
+02:52:28 | INFO |     step 14200  loss=1.3715  grp_sp=0.000  n_imp=37008  n_red=0
+02:59:16 | INFO |     step 14400  loss=1.3688  grp_sp=0.000  n_imp=37008  n_red=0
+03:06:02 | INFO |     step 14600  loss=1.3657  grp_sp=0.000  n_imp=37008  n_red=0
+03:12:55 | INFO |     step 14800  loss=1.3627  grp_sp=0.000  n_imp=37008  n_red=0
+03:19:40 | INFO |     step 15000  loss=1.3586  grp_sp=0.000  n_imp=37008  n_red=0
+03:26:40 | INFO |     step 15200  loss=1.3557  grp_sp=0.000  n_imp=37008  n_red=0
+03:33:23 | INFO |     step 15400  loss=1.3539  grp_sp=0.000  n_imp=37008  n_red=0
+03:40:16 | INFO |     step 15600  loss=1.3512  grp_sp=0.000  n_imp=37008  n_red=0
+03:47:07 | INFO |     step 15800  loss=1.3490  grp_sp=0.000  n_imp=37008  n_red=0
+03:53:29 | INFO |     step 16000  loss=1.3466  grp_sp=0.000  n_imp=37008  n_red=0
+04:00:36 | INFO |     step 16200  loss=1.3441  grp_sp=0.000  n_imp=37008  n_red=0
+04:07:32 | INFO |     step 16400  loss=1.3420  grp_sp=0.000  n_imp=37008  n_red=0
+04:14:33 | INFO |     step 16600  loss=1.3392  grp_sp=0.000  n_imp=37008  n_red=0
+04:21:11 | INFO |     step 16800  loss=1.3363  grp_sp=0.000  n_imp=37008  n_red=0
+04:27:44 | INFO |     step 17000  loss=1.3340  grp_sp=0.000  n_imp=37008  n_red=0
+04:34:16 | INFO |     step 17200  loss=1.3310  grp_sp=0.000  n_imp=37008  n_red=0
+04:41:10 | INFO |     step 17400  loss=1.3282  grp_sp=0.000  n_imp=37008  n_red=0
+04:48:08 | INFO |     step 17600  loss=1.3263  grp_sp=0.000  n_imp=37008  n_red=0
+04:55:06 | INFO |     step 17800  loss=1.3239  grp_sp=0.000  n_imp=37008  n_red=0
+05:02:15 | INFO |     step 18000  loss=1.3208  grp_sp=0.000  n_imp=37008  n_red=0
+05:09:13 | INFO |     step 18200  loss=1.3184  grp_sp=0.000  n_imp=37008  n_red=0
+05:16:08 | INFO |     step 18400  loss=1.3156  grp_sp=0.000  n_imp=37008  n_red=0
+05:23:00 | INFO |     step 18600  loss=1.3121  grp_sp=0.000  n_imp=37008  n_red=0
+05:29:46 | INFO |     step 18800  loss=1.3098  grp_sp=0.000  n_imp=37008  n_red=0
+05:36:31 | INFO |     step 19000  loss=1.3080  grp_sp=0.000  n_imp=37008  n_red=0
+05:43:35 | INFO |     step 19200  loss=1.3071  grp_sp=0.000  n_imp=37008  n_red=0
+05:50:19 | INFO |     step 19400  loss=1.3054  grp_sp=0.000  n_imp=37008  n_red=0
+05:57:08 | INFO |     step 19600  loss=1.3037  grp_sp=0.000  n_imp=37008  n_red=0
+06:04:08 | INFO |     step 19800  loss=1.3018  grp_sp=0.000  n_imp=37008  n_red=0
+06:11:25 | INFO |     step 20000  loss=1.3003  grp_sp=0.000  n_imp=37008  n_red=0
+06:18:20 | INFO |     step 20200  loss=1.2986  grp_sp=0.000  n_imp=37008  n_red=0
+06:25:14 | INFO |     step 20400  loss=1.2966  grp_sp=0.000  n_imp=37008  n_red=0
+06:31:55 | INFO |     step 20600  loss=1.2945  grp_sp=0.000  n_imp=37008  n_red=0
+06:38:46 | INFO |     step 20800  loss=1.2923  grp_sp=0.000  n_imp=37008  n_red=0
+06:45:43 | INFO |     step 21000  loss=1.2908  grp_sp=0.000  n_imp=37008  n_red=0
+06:52:37 | INFO |     step 21200  loss=1.2890  grp_sp=0.000  n_imp=37008  n_red=0
+07:00:10 | INFO |     step 21400  loss=1.2869  grp_sp=0.000  n_imp=37008  n_red=0
+07:06:57 | INFO |     step 21600  loss=1.2859  grp_sp=0.000  n_imp=37008  n_red=0
+07:14:28 | INFO |     step 21800  loss=1.2841  grp_sp=0.000  n_imp=37008  n_red=0
+07:21:17 | INFO |     step 22000  loss=1.2826  grp_sp=0.000  n_imp=37008  n_red=0
+07:32:35 | INFO | [EPOCH 1/10] loss=1.2820  grp_sp=0.000  EM=77.75  F1=85.56  elapsed=754.6min
+07:34:59 | INFO |     step 22200  loss=0.7353  grp_sp=0.000  n_imp=37008  n_red=0
+07:41:27 | INFO |     step 22400  loss=0.7170  grp_sp=0.000  n_imp=37008  n_red=0
+07:47:34 | INFO |     step 22600  loss=0.7276  grp_sp=0.000  n_imp=37008  n_red=0
+07:53:38 | INFO |     step 22800  loss=0.7454  grp_sp=0.000  n_imp=37008  n_red=0
+07:59:40 | INFO |     step 23000  loss=0.7509  grp_sp=0.000  n_imp=37008  n_red=0
+08:05:44 | INFO |     step 23200  loss=0.7580  grp_sp=0.000  n_imp=37008  n_red=0
+08:11:46 | INFO |     step 23400  loss=0.7633  grp_sp=0.000  n_imp=37008  n_red=0
+08:17:56 | INFO |     step 23600  loss=0.7678  grp_sp=0.000  n_imp=37008  n_red=0
+08:24:14 | INFO |     step 23800  loss=0.7636  grp_sp=0.000  n_imp=37008  n_red=0
+08:30:24 | INFO |     step 24000  loss=0.7631  grp_sp=0.000  n_imp=37008  n_red=0
+08:36:30 | INFO |     step 24200  loss=0.7667  grp_sp=0.000  n_imp=37008  n_red=0
+08:42:44 | INFO |     step 24400  loss=0.7704  grp_sp=0.000  n_imp=37008  n_red=0
+08:48:54 | INFO |     step 24600  loss=0.7725  grp_sp=0.000  n_imp=37008  n_red=0
+08:55:11 | INFO |     step 24800  loss=0.7725  grp_sp=0.000  n_imp=37008  n_red=0
+09:01:22 | INFO |     step 25000  loss=0.7747  grp_sp=0.000  n_imp=37008  n_red=0
+09:07:33 | INFO |     step 25200  loss=0.7760  grp_sp=0.000  n_imp=37008  n_red=0
+09:13:47 | INFO |     step 25400  loss=0.7773  grp_sp=0.000  n_imp=37008  n_red=0
+09:19:57 | INFO |     step 25600  loss=0.7770  grp_sp=0.000  n_imp=37008  n_red=0
+09:26:07 | INFO |     step 25800  loss=0.7757  grp_sp=0.000  n_imp=37008  n_red=0
+09:32:16 | INFO |     step 26000  loss=0.7779  grp_sp=0.000  n_imp=37008  n_red=0
+09:38:29 | INFO |     step 26200  loss=0.7776  grp_sp=0.000  n_imp=37008  n_red=0
+09:44:39 | INFO |     step 26400  loss=0.7756  grp_sp=0.000  n_imp=37008  n_red=0
+09:50:49 | INFO |     step 26600  loss=0.7749  grp_sp=0.000  n_imp=37008  n_red=0
+09:56:58 | INFO |     step 26800  loss=0.7759  grp_sp=0.000  n_imp=37008  n_red=0
+10:03:06 | INFO |     step 27000  loss=0.7793  grp_sp=0.000  n_imp=37008  n_red=0
+10:09:12 | INFO |     step 27200  loss=0.7780  grp_sp=0.000  n_imp=37008  n_red=0
+10:15:23 | INFO |     step 27400  loss=0.7783  grp_sp=0.000  n_imp=37008  n_red=0
+10:21:29 | INFO |     step 27600  loss=0.7760  grp_sp=0.000  n_imp=37008  n_red=0
+10:27:41 | INFO |     step 27800  loss=0.7771  grp_sp=0.000  n_imp=37008  n_red=0
+10:33:55 | INFO |     step 28000  loss=0.7788  grp_sp=0.000  n_imp=37008  n_red=0
+10:40:00 | INFO |     step 28200  loss=0.7788  grp_sp=0.000  n_imp=37008  n_red=0
+10:46:07 | INFO |     step 28400  loss=0.7782  grp_sp=0.000  n_imp=37008  n_red=0
+10:52:17 | INFO |     step 28600  loss=0.7788  grp_sp=0.000  n_imp=37008  n_red=0
+10:58:24 | INFO |     step 28800  loss=0.7799  grp_sp=0.000  n_imp=37008  n_red=0
+11:04:40 | INFO |     step 29000  loss=0.7794  grp_sp=0.000  n_imp=37008  n_red=0
+11:10:48 | INFO |     step 29200  loss=0.7811  grp_sp=0.000  n_imp=37008  n_red=0
+11:16:56 | INFO |     step 29400  loss=0.7804  grp_sp=0.000  n_imp=37008  n_red=0
+11:22:59 | INFO |     step 29600  loss=0.7813  grp_sp=0.000  n_imp=37008  n_red=0
+11:29:07 | INFO |     step 29800  loss=0.7816  grp_sp=0.000  n_imp=37008  n_red=0
+11:35:19 | INFO |     step 30000  loss=0.7814  grp_sp=0.000  n_imp=37008  n_red=0
+11:41:29 | INFO |     step 30200  loss=0.7829  grp_sp=0.000  n_imp=37008  n_red=0
+11:47:38 | INFO |     step 30400  loss=0.7846  grp_sp=0.000  n_imp=37008  n_red=0
+11:53:45 | INFO |     step 30600  loss=0.7868  grp_sp=0.000  n_imp=37008  n_red=0
+11:59:51 | INFO |     step 30800  loss=0.7870  grp_sp=0.000  n_imp=37008  n_red=0
+12:05:59 | INFO |     step 31000  loss=0.7873  grp_sp=0.000  n_imp=37008  n_red=0
+12:12:11 | INFO |     step 31200  loss=0.7870  grp_sp=0.000  n_imp=37008  n_red=0
+12:18:18 | INFO |     step 31400  loss=0.7862  grp_sp=0.000  n_imp=37008  n_red=0
+12:24:32 | INFO |     step 31600  loss=0.7853  grp_sp=0.000  n_imp=37008  n_red=0
+12:30:43 | INFO |     step 31800  loss=0.7872  grp_sp=0.000  n_imp=37008  n_red=0
+12:36:58 | INFO |     step 32000  loss=0.7879  grp_sp=0.000  n_imp=37008  n_red=0
+12:43:10 | INFO |     step 32200  loss=0.7881  grp_sp=0.000  n_imp=37008  n_red=0
+12:49:19 | INFO |     step 32400  loss=0.7886  grp_sp=0.000  n_imp=37008  n_red=0
+12:55:29 | INFO |     step 32600  loss=0.7896  grp_sp=0.000  n_imp=37008  n_red=0
+13:01:32 | INFO |     step 32800  loss=0.7895  grp_sp=0.000  n_imp=37008  n_red=0
+13:07:49 | INFO |     step 33000  loss=0.7907  grp_sp=0.000  n_imp=37008  n_red=0
+13:14:01 | INFO |     step 33200  loss=0.7909  grp_sp=0.000  n_imp=37008  n_red=0
+13:20:14 | INFO |     step 33400  loss=0.7909  grp_sp=0.000  n_imp=37008  n_red=0
+13:26:27 | INFO |     step 33600  loss=0.7917  grp_sp=0.000  n_imp=37008  n_red=0
+13:32:35 | INFO |     step 33800  loss=0.7922  grp_sp=0.000  n_imp=37008  n_red=0
+13:38:43 | INFO |     step 34000  loss=0.7925  grp_sp=0.000  n_imp=37008  n_red=0
+13:44:52 | INFO |     step 34200  loss=0.7928  grp_sp=0.000  n_imp=37008  n_red=0
+13:51:03 | INFO |     step 34400  loss=0.7936  grp_sp=0.000  n_imp=37008  n_red=0
+13:57:12 | INFO |     step 34600  loss=0.7950  grp_sp=0.000  n_imp=37008  n_red=0
+14:03:23 | INFO |     step 34800  loss=0.7957  grp_sp=0.000  n_imp=37008  n_red=0
+14:09:23 | INFO |     step 35000  loss=0.7963  grp_sp=0.000  n_imp=37008  n_red=0
+14:15:29 | INFO |     step 35200  loss=0.7968  grp_sp=0.000  n_imp=37008  n_red=0
+14:21:41 | INFO |     step 35400  loss=0.7975  grp_sp=0.000  n_imp=37008  n_red=0
+14:27:50 | INFO |     step 35600  loss=0.7980  grp_sp=0.000  n_imp=37008  n_red=0
+14:34:03 | INFO |     step 35800  loss=0.7982  grp_sp=0.000  n_imp=37008  n_red=0
+14:40:14 | INFO |     step 36000  loss=0.7989  grp_sp=0.000  n_imp=37008  n_red=0
+14:46:25 | INFO |     step 36200  loss=0.7995  grp_sp=0.000  n_imp=37008  n_red=0
+14:52:35 | INFO |     step 36400  loss=0.7991  grp_sp=0.000  n_imp=37008  n_red=0
+14:58:45 | INFO |     step 36600  loss=0.7994  grp_sp=0.000  n_imp=37008  n_red=0
+15:04:55 | INFO |     step 36800  loss=0.8006  grp_sp=0.000  n_imp=37008  n_red=0
+15:11:02 | INFO |     step 37000  loss=0.8010  grp_sp=0.000  n_imp=37008  n_red=0
+15:17:14 | INFO |     step 37200  loss=0.8005  grp_sp=0.000  n_imp=37008  n_red=0
+15:23:25 | INFO |     step 37400  loss=0.8000  grp_sp=0.000  n_imp=37008  n_red=0
+15:29:31 | INFO |     step 37600  loss=0.8008  grp_sp=0.000  n_imp=37008  n_red=0
+15:35:37 | INFO |     step 37800  loss=0.8016  grp_sp=0.000  n_imp=37008  n_red=0
+15:41:48 | INFO |     step 38000  loss=0.8020  grp_sp=0.000  n_imp=37008  n_red=0
+15:47:56 | INFO |     step 38200  loss=0.8022  grp_sp=0.000  n_imp=37008  n_red=0
+15:54:06 | INFO |     step 38400  loss=0.8032  grp_sp=0.000  n_imp=37008  n_red=0
+16:00:10 | INFO |     step 38600  loss=0.8028  grp_sp=0.000  n_imp=37008  n_red=0
+16:06:15 | INFO |     step 38800  loss=0.8040  grp_sp=0.000  n_imp=37008  n_red=0
+16:12:21 | INFO |     step 39000  loss=0.8043  grp_sp=0.000  n_imp=37008  n_red=0
+16:18:27 | INFO |     step 39200  loss=0.8047  grp_sp=0.000  n_imp=37008  n_red=0
+16:24:32 | INFO |     step 39400  loss=0.8050  grp_sp=0.000  n_imp=37008  n_red=0
+16:30:39 | INFO |     step 39600  loss=0.8050  grp_sp=0.000  n_imp=37008  n_red=0
+16:36:45 | INFO |     step 39800  loss=0.8049  grp_sp=0.000  n_imp=37008  n_red=0
+16:42:49 | INFO |     step 40000  loss=0.8056  grp_sp=0.000  n_imp=37008  n_red=0
+16:48:56 | INFO |     step 40200  loss=0.8062  grp_sp=0.000  n_imp=37008  n_red=0
+16:54:58 | INFO |     step 40400  loss=0.8061  grp_sp=0.000  n_imp=37008  n_red=0
+17:01:06 | INFO |     step 40600  loss=0.8072  grp_sp=0.000  n_imp=37008  n_red=0
+17:07:12 | INFO |     step 40800  loss=0.8070  grp_sp=0.000  n_imp=37008  n_red=0

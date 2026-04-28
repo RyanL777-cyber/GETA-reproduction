@@ -1,0 +1,235 @@
+[gpu] CUDA_VISIBLE_DEVICES already set: 5
+19:00:24 | INFO | [log] ./results/phase5_20260427_190024.log
+19:00:24 | INFO | [env] torch=2.5.1+cu121  device=cpu
+19:00:24 | INFO | [cfg] sparsity=[0.1]  epochs=3  bs=4  lr=3e-05  lr_quant=0.0001  br=2  P=6  Kp=6  seed=42
+19:00:32 | INFO | [DATA] raw train=87599  raw val=10570
+19:00:32 | INFO | [DATA] train subsetted to 8759 (10%)
+19:00:32 | INFO | [DATA] val subsetted to 1000
+Map:   0%|          | 0/8759 [00:00<?, ? examples/s]Map:  11%|█▏        | 1000/8759 [00:02<00:18, 422.84 examples/s]Map:  23%|██▎       | 2000/8759 [00:04<00:13, 498.66 examples/s]Map:  34%|███▍      | 3000/8759 [00:05<00:10, 548.87 examples/s]Map:  46%|████▌     | 4000/8759 [00:07<00:08, 587.52 examples/s]Map:  57%|█████▋    | 5000/8759 [00:08<00:06, 614.27 examples/s]Map:  69%|██████▊   | 6000/8759 [00:10<00:04, 623.90 examples/s]Map:  80%|███████▉  | 7000/8759 [00:12<00:02, 595.38 examples/s]Map:  91%|█████████▏| 8000/8759 [00:13<00:01, 613.60 examples/s]Map: 100%|██████████| 8759/8759 [00:14<00:00, 658.96 examples/s]Map: 100%|██████████| 8759/8759 [00:14<00:00, 600.97 examples/s]
+19:00:46 | INFO | [DATA] train features=8848  val features=1020
+19:00:46 | INFO | 
+============================================================
+19:00:46 | INFO |   EXPERIMENT: sparsity=0.1  tag=A5_calib4_sp10
+19:00:46 | INFO | ============================================================
+19:00:46 | INFO | [M1] loading BERT QA
+19:00:48 | INFO | [M2] quantize wrap + STE fix
+2026-04-27 19:00:48,491 - quant_fix - INFO - STE fix applied to SymQuantizerNonLinear and SymQuantizerLinear
+2026-04-27 19:00:53,334 - only_train_once.quantization.quant_model - INFO - Converted 73 layers to quantized versions
+19:00:53 | INFO | [CALIB] running 8 batches of bs=4
+19:02:37 | INFO | [calib] 8 batches over 73 layers  (skipped=0)  num_bits=4  safety=1.05
+19:02:37 | INFO | [calib] observed max|x|: min=2.830  median=14.866  max=140.579
+19:02:37 | INFO | [M3] building OTO graph
+/home/h24116081/miniconda3/lib/python3.13/site-packages/transformers/modeling_attn_mask_utils.py:196: TracerWarning: torch.tensor results are registered as constants in the trace. You can safely ignore this warning if you use this function to create tensors out of constant variables that would be the same every time you call this function. In any other case, this might cause the trace to be incorrect.
+  inverted_mask = torch.tensor(1.0, dtype=dtype) - expanded_mask
+/home/h24116081/GETA reprocution/GETA-reproduction/geta/only_train_once/quantization/quant_layers.py:334: TracerWarning: torch.tensor results are registered as constants in the trace. You can safely ignore this warning if you use this function to create tensors out of constant variables that would be the same every time you call this function. In any other case, this might cause the trace to be incorrect.
+  weight_clip_val = torch.tensor(self.weight_clip_val, device=weight.device)
+/home/h24116081/GETA reprocution/GETA-reproduction/geta/only_train_once/quantization/quant_layers.py:335: TracerWarning: torch.tensor results are registered as constants in the trace. You can safely ignore this warning if you use this function to create tensors out of constant variables that would be the same every time you call this function. In any other case, this might cause the trace to be incorrect.
+  q_s = torch.tensor(0.0, device=weight.device)
+/home/h24116081/GETA reprocution/GETA-reproduction/geta/only_train_once/quantization/quant_layers.py:361: TracerWarning: torch.tensor results are registered as constants in the trace. You can safely ignore this warning if you use this function to create tensors out of constant variables that would be the same every time you call this function. In any other case, this might cause the trace to be incorrect.
+  activation_clip_val = torch.tensor(self.act_clip_val, device=activation.device)
+/home/h24116081/GETA reprocution/GETA-reproduction/geta/only_train_once/quantization/quant_layers.py:362: TracerWarning: torch.tensor results are registered as constants in the trace. You can safely ignore this warning if you use this function to create tensors out of constant variables that would be the same every time you call this function. In any other case, this might cause the trace to be incorrect.
+  q_s = torch.tensor(0.0, device=activation.device)
+OTO graph constructor
+graph build
+NodePattern mul None
+NodePattern transpose None
+NodePattern matmul None
+Post-processing of graph completed.
+Graph has 1102 nodes and 1177 edges.
+19:04:29 | INFO | [SCHED] steps/epoch=2212  total=6636  start_prune=1106 (0.50 ep)  prune_steps=5530 (2.50 ep)  prune_periods=6  proj_periods=6  proj_steps=1106 (0.50 ep)
+19:04:29 | INFO | [BIT]   min_bit_wt=4  max_bit_wt=16  bit_reduction=2  calib_num_bits=4
+19:04:29 | INFO | [LR]    scheduler=none  warmup_ratio=0.1  lr=3e-05  lr_quant=0.0001
+19:04:29 | INFO | [M4] building GETA optimizer
+2026-04-27 19:04:29,746 - GETA - INFO - Setup GETA
+2026-04-27 19:04:29,746 - GETA - INFO - importance_score_criteria: {'mag19:05:45 | INFO |     step 600  loss=5.7155  grp_sp=0.000  n_imp=37008  n_red=0
+19:11:24 | INFO |     step 800  loss=5.6853  grp_sp=0.000  n_imp=37008  n_red=0
+19:17:06 | INFO |     step 1000  loss=5.6854  grp_sp=0.000  n_imp=37008  n_red=0
+19:22:36 | INFO |     step 1200  loss=5.7216  grp_sp=0.000  n_imp=37008  n_red=0
+19:28:25 | INFO |     step 1400  loss=5.7514  grp_sp=0.000  n_imp=37008  n_red=0
+19:34:12 | INFO |     step 1600  loss=5.7745  grp_sp=0.000  n_imp=37008  n_red=0
+19:40:01 | INFO |     step 1800  loss=5.7927  grp_sp=0.000  n_imp=37008  n_red=0
+19:45:41 | INFO |     step 2000  loss=5.7972  grp_sp=0.000  n_imp=37008  n_red=0
+19:51:43 | INFO |     step 2200  loss=5.8137  grp_sp=0.000  n_imp=37008  n_red=0
+19:57:25 | INFO |     step 2400  los01:07:08 | INFO |     step 200  loss=5.9223  grp_sp=0.000  n_imp=37008  n_red=0
+08:05:00 | INFO |     step 400  loss=5.9352  grp_sp=0.000  n_imp=37008  n_red=0
+12:47:07 | INFO |     step 600  loss=5.9384  grp_sp=0.000  n_imp=37008  n_red=0
+16:21:55 | INFO |     step 800  loss=5.9407  grp_sp=0.000  n_imp=37008  n_red=0
+ loss=5.6558  grp_sp=0.000  n_imp=37008  n_red=0
+20:25:35 | INFO |     step 3400  loss=5.6211  grp_sp=0.000  n_imp=37008  n_red=0
+20:31:17 | INFO |     step 3600  loss=5.5909  grp_sp=0.000  n_imp=37008  n_red=0
+20:37:18 | INFO |     step 3800  loss=5.5634  grp_sp=0.000  n_imp=37008  n_red=0
+20:43:05 | INFO |     step 4000  loss=5.5467  grp_sp=0.000  n_imp=37008  n_red=0
+20:48:29 | INFO |     step 4200  loss=5.5230  grp_sp=0.000  n_imp=37008  n_red=0
+20:54:19 | INFO |     step 4400  loss=5.5020  grp_sp=0.000  n_imp=37008  n_red=0
+21:00:30 | INFO |     step 4600  loss=5.4834  grp_sp=0.000  n_imp=37008  n_red=0
+21:06:51 | INFO |     step 4800  loss=5.4656  grp_sp=0.000  n_imp=37008  n_red=0
+21:13:11 | INFO |     step 5000  loss=5.4464  grp_sp=0.000  n_imp=37008  n_red=0
+21:19:24 | INFO |     step 5200  loss=5.4308  grp_sp=0.000  n_imp=37008  n_red=0
+21:25:44 | INFO |     step 5400  loss=5.4156  grp_sp=0.000  n_imp=37008  n_red=0
+21:32:05 | INFO |     step 5600  loss=5.4021  grp_sp=0.000  n_imp=37008  n_red=0
+21:38:18 | INFO |     step 5800  loss=5.3893  grp_sp=0.000  n_imp=37008  n_red=0
+21:44:36 | INFO |     step 6000  loss=5.3776  grp_sp=0.000  n_imp=37008  n_red=0
+21:51:05 | INFO |     step 6200  loss=5.3657  grp_sp=0.000  n_imp=37008  n_red=0
+21:57:46 | INFO |     step 6400  loss=5.3550  grp_sp=0.000  n_imp=37008  n_red=0
+22:04:36 | INFO |     step 6600  loss=5.3465  grp_sp=0.000  n_imp=37008  n_red=0
+22:11:33 | INFO |     step 6800  loss=5.3367  grp_sp=0.000  n_imp=37008  n_red=0
+22:18:27 | INFO |     step 7000  loss=5.3276  grp_sp=0.000  n_imp=37008  n_red=0
+22:25:21 | INFO |     step 7200  loss=5.3193  grp_sp=0.000  n_imp=37008  n_red=0
+22:32:05 | INFO |     step 7400  loss=5.3112  grp_sp=0.000  n_imp=37008  n_red=0
+22:38:53 | INFO |     step 7600  loss=5.3037  grp_sp=0.000  n_imp=37008  n_red=0
+22:45:38 | INFO |     step 7800  loss=5.2969  grp_sp=0.000  n_imp=37008  n_red=0
+22:52:23 | INFO |     step 8000  loss=5.2901  grp_sp=0.000  n_imp=37008  n_red=0
+22:59:17 | INFO |     step 8200  loss=5.2836  grp_sp=0.000  n_imp=37008  n_red=0
+23:06:05 | INFO |     step 8400  loss=5.2774  grp_sp=0.000  n_imp=37008  n_red=0
+23:13:05 | INFO |     step 8600  loss=5.2718  grp_sp=0.000  n_imp=37008  n_red=0
+23:19:41 | INFO |     step 8800  loss=5.2659  grp_sp=0.000  n_imp=37008  n_red=0
+23:26:28 | INFO |     step 9000  loss=5.2609  grp_sp=0.000  n_imp=37008  n_red=0
+23:33:16 | INFO |     step 9200  loss=5.2562  grp_sp=0.000  n_imp=37008  n_red=0
+23:40:11 | INFO |     step 9400  loss=5.2513  grp_sp=0.000  n_imp=37008  n_red=0
+23:47:20 | INFO |     step 9600  loss=5.2465  grp_sp=0.000  n_imp=37008  n_red=0
+23:54:02 | INFO |     step 9800  loss=5.2422  grp_sp=0.000  n_imp=37008  n_red=0
+00:00:56 | INFO |     step 10000  loss=5.2386  grp_sp=0.000  n_imp=37008  n_red=0
+00:08:09 | INFO |     step 10200  loss=5.2346  grp_sp=0.000  n_imp=37008  n_red=0
+00:15:28 | INFO |     step 10400  loss=5.2311  grp_sp=0.000  n_imp=37008  n_red=0
+00:22:28 | INFO |     step 10600  loss=5.2274  grp_sp=0.000  n_imp=37008  n_red=0
+00:29:07 | INFO |     step 10800  loss=5.2235  grp_sp=0.000  n_imp=37008  n_red=0
+00:36:15 | INFO |     step 11000  loss=5.2199  grp_sp=0.000  n_imp=37008  n_red=0
+2026-04-28 00:38:41,428 - GETA - INFO - Determining important and redundant groups using saliency scores. Step=11066
+00:43:50 | INFO |     step 11200  loss=5.2160  grp_sp=0.000  n_imp=36392  n_red=616
+00:51:28 | INFO |     step 11400  loss=5.2128  grp_sp=0.000  n_imp=36392  n_red=616
+00:58:40 | INFO |     step 11600  loss=5.2095  grp_sp=0.000  n_imp=36392  n_red=616
+01:05:57 | INFO |     step 11800  loss=5.2060  grp_sp=0.000  n_imp=36392  n_red=616
+01:13:18 | INFO |     step 12000  loss=5.2029  grp_sp=0.000  n_imp=36392  n_red=616
+01:20:50 | INFO |     step 12200  loss=5.2004  grp_sp=0.000  n_imp=36392  n_red=616
+01:28:28 | INFO |     step 12400  loss=5.1975  grp_sp=0.000  n_imp=36392  n_red=616
+01:36:05 | INFO |     step 12600  loss=5.1945  grp_sp=0.000  n_imp=36392  n_red=616
+01:43:44 | INFO |     step 12800  loss=5.1916  grp_sp=0.000  n_imp=36392  n_red=616
+01:51:19 | INFO |     step 13000  loss=5.1887  grp_sp=0.000  n_imp=36392  n_red=616
+01:58:52 | INFO |     step 13200  loss=5.1861  grp_sp=0.000  n_imp=36392  n_red=616
+02:06:45 | INFO |     step 13400  loss=5.1835  grp_sp=0.000  n_imp=36392  n_red=616
+02:14:30 | INFO |     step 13600  loss=5.1808  grp_sp=0.000  n_imp=36392  n_red=616
+02:21:46 | INFO |     step 13800  loss=5.1782  grp_sp=0.000  n_imp=36392  n_red=616
+02:29:10 | INFO |     step 14000  loss=5.1761  grp_sp=0.000  n_imp=36392  n_red=616
+02:36:33 | INFO |     step 14200  loss=5.1736  grp_sp=0.000  n_imp=36392  n_red=616
+02:43:30 | INFO |     step 14400  loss=5.1712  grp_sp=0.000  n_imp=36392  n_red=616
+02:50:31 | INFO |     step 14600  loss=5.1686  grp_sp=0.000  n_imp=36392  n_red=616
+02:57:45 | INFO |     step 14800  loss=5.1662  grp_sp=0.000  n_imp=36392  n_red=616
+03:05:12 | INFO |     step 15000  loss=5.1645  grp_sp=0.000  n_imp=36392  n_red=616
+03:12:35 | INFO |     step 15200  loss=5.1621  grp_sp=0.000  n_imp=36392  n_red=616
+03:19:47 | INFO |     step 15400  loss=5.1601  grp_sp=0.000  n_imp=36392  n_red=616
+03:27:04 | INFO |     step 15600  loss=5.1581  grp_sp=0.000  n_imp=36392  n_red=616
+03:34:29 | INFO |     step 15800  loss=5.1562  grp_sp=0.000  n_imp=36392  n_red=616
+03:41:37 | INFO |     step 16000  loss=5.1543  grp_sp=0.000  n_imp=36392  n_red=616
+03:48:50 | INFO |     step 16200  loss=5.1530  grp_sp=0.000  n_imp=36392  n_red=616
+03:55:55 | INFO |     step 16400  loss=5.1512  grp_sp=0.000  n_imp=36392  n_red=616
+04:03:27 | INFO |     step 16600  loss=5.1495  grp_sp=0.000  n_imp=36392  n_red=616
+04:11:03 | INFO |     step 16800  loss=5.1479  grp_sp=0.000  n_imp=36392  n_red=616
+04:18:32 | INFO |     step 17000  loss=5.1461  grp_sp=0.000  n_imp=36392  n_red=616
+04:25:26 | INFO |     step 17200  loss=5.1446  grp_sp=0.000  n_imp=36392  n_red=616
+04:32:33 | INFO |     step 17400  loss=5.1431  grp_sp=0.000  n_imp=36392  n_red=616
+04:39:41 | INFO |     step 17600  loss=5.1413  grp_sp=0.000  n_imp=36392  n_red=616
+04:47:10 | INFO |     step 17800  loss=5.1402  grp_sp=0.000  n_imp=36392  n_red=616
+04:54:43 | INFO |     step 18000  loss=5.1383  grp_sp=0.000  n_imp=36392  n_red=616
+05:02:15 | INFO |     step 18200  loss=5.1371  grp_sp=0.000  n_imp=36392  n_red=616
+05:09:44 | INFO |     step 18400  loss=5.1359  grp_sp=0.000  n_imp=36392  n_red=616
+05:17:22 | INFO |     step 18600  loss=5.1344  grp_sp=0.000  n_imp=36392  n_red=616
+05:24:50 | INFO |     step 18800  loss=5.1332  grp_sp=0.000  n_imp=36392  n_red=616
+05:32:21 | INFO |     step 19000  loss=5.1319  grp_sp=0.000  n_imp=36392  n_red=616
+05:39:57 | INFO |     step 19200  loss=5.1302  grp_sp=0.000  n_imp=36392  n_red=616
+05:47:19 | INFO |     step 19400  loss=5.1287  grp_sp=0.000  n_imp=36392  n_red=616
+05:55:00 | INFO |     step 19600  loss=5.1275  grp_sp=0.000  n_imp=36392  n_red=616
+06:02:31 | INFO |     step 19800  loss=5.1265  grp_sp=0.000  n_imp=36392  n_red=616
+06:10:49 | INFO |     step 20000  loss=5.1254  grp_sp=0.000  n_imp=36392  n_red=616
+06:18:26 | INFO |     step 20200  loss=5.1242  grp_sp=0.000  n_imp=36392  n_red=616
+2026-04-28 06:21:47,196 - GETA - INFO - Determining important and redundant groups using saliency scores. Step=20286
+06:26:09 | INFO |     step 20400  loss=5.1233  grp_sp=0.017  n_imp=35776  n_red=1232
+06:33:53 | INFO |     step 20600  loss=5.1222  grp_sp=0.017  n_imp=35776  n_red=1232
+06:41:25 | INFO |     step 20800  loss=5.1217  grp_sp=0.017  n_imp=35776  n_red=1232
+06:49:10 | INFO |     step 21000  loss=5.1209  grp_sp=0.017  n_imp=35776  n_red=1232
+06:57:27 | INFO |     step 21200  loss=5.1198  grp_sp=0.017  n_imp=35776  n_red=1232
+07:05:07 | INFO |     step 21400  loss=5.1193  grp_sp=0.017  n_imp=35776  n_red=1232
+07:12:51 | INFO |     step 21600  loss=5.1185  grp_sp=0.017  n_imp=35776  n_red=1232
+07:20:34 | INFO |     step 21800  loss=5.1180  grp_sp=0.017  n_imp=35776  n_red=1232
+07:28:33 | INFO |     step 22000  loss=5.1174  grp_sp=0.017  n_imp=35776  n_red=1232
+07:40:12 | INFO | [EPOCH 1/3] loss=5.1168  grp_sp=0.017  EM=0.25  F1=5.63  elapsed=763.9min
+07:42:38 | INFO |     step 22200  loss=4.9986  grp_sp=0.017  n_imp=35776  n_red=1232
+07:50:39 | INFO |     step 22400  loss=5.0181  grp_sp=0.017  n_imp=35776  n_red=1232
+07:57:53 | INFO |     step 22600  loss=5.0230  grp_sp=0.017  n_imp=35776  n_red=1232
+08:05:49 | INFO |     step 22800  loss=5.0230  grp_sp=0.017  n_imp=35776  n_red=1232
+08:13:05 | INFO |     step 23000  loss=5.0201  grp_sp=0.017  n_imp=35776  n_red=1232
+08:20:16 | INFO |     step 23200  loss=5.0201  grp_sp=0.017  n_imp=35776  n_red=1232
+08:27:20 | INFO |     step 23400  loss=5.0195  grp_sp=0.017  n_imp=35776  n_red=1232
+08:34:28 | INFO |     step 23600  loss=5.0211  grp_sp=0.017  n_imp=35776  n_red=1232
+08:41:37 | INFO |     step 23800  loss=5.0255  grp_sp=0.017  n_imp=35776  n_red=1232
+08:48:42 | INFO |     step 24000  loss=5.0221  grp_sp=0.017  n_imp=35776  n_red=1232
+08:55:56 | INFO |     step 24200  loss=5.0327  grp_sp=0.017  n_imp=35776  n_red=1232
+09:03:07 | INFO |     step 24400  loss=5.0422  grp_sp=0.017  n_imp=35776  n_red=1232
+09:10:10 | INFO |     step 24600  loss=5.0395  grp_sp=0.017  n_imp=35776  n_red=1232
+09:17:17 | INFO |     step 24800  loss=5.0375  grp_sp=0.017  n_imp=35776  n_red=1232
+09:24:24 | INFO |     step 25000  loss=5.0348  grp_sp=0.017  n_imp=35776  n_red=1232
+09:31:30 | INFO |     step 25200  loss=5.0340  grp_sp=0.017  n_imp=35776  n_red=1232
+09:38:35 | INFO |     step 25400  loss=5.0334  grp_sp=0.017  n_imp=35776  n_red=1232
+09:45:41 | INFO |     step 25600  loss=5.0332  grp_sp=0.017  n_imp=35776  n_red=1232
+09:52:49 | INFO |     step 25800  loss=5.0327  grp_sp=0.017  n_imp=35776  n_red=1232
+09:59:55 | INFO |     step 26000  loss=5.0315  grp_sp=0.017  n_imp=35776  n_red=1232
+10:06:56 | INFO |     step 26200  loss=5.0328  grp_sp=0.017  n_imp=35776  n_red=1232
+10:13:59 | INFO |     step 26400  loss=5.0329  grp_sp=0.017  n_imp=35776  n_red=1232
+10:21:06 | INFO |     step 26600  loss=5.0327  grp_sp=0.017  n_imp=35776  n_red=1232
+10:28:15 | INFO |     step 26800  loss=5.0333  grp_sp=0.017  n_imp=35776  n_red=1232
+10:35:19 | INFO |     step 27000  loss=5.0337  grp_sp=0.017  n_imp=35776  n_red=1232
+10:42:22 | INFO |     step 27200  loss=5.0330  grp_sp=0.017  n_imp=35776  n_red=1232
+10:49:27 | INFO |     step 27400  loss=5.0324  grp_sp=0.017  n_imp=35776  n_red=1232
+10:56:29 | INFO |     step 27600  loss=5.0328  grp_sp=0.017  n_imp=35776  n_red=1232
+11:03:34 | INFO |     step 27800  loss=5.0332  grp_sp=0.017  n_imp=35776  n_red=1232
+11:10:35 | INFO |     step 28000  loss=5.0341  grp_sp=0.017  n_imp=35776  n_red=1232
+11:17:36 | INFO |     step 28200  loss=5.0341  grp_sp=0.017  n_imp=35776  n_red=1232
+11:24:44 | INFO |     step 28400  loss=5.0339  grp_sp=0.017  n_imp=35776  n_red=1232
+11:31:49 | INFO |     step 28600  loss=5.0340  grp_sp=0.017  n_imp=35776  n_red=1232
+11:38:58 | INFO |     step 28800  loss=5.0346  grp_sp=0.017  n_imp=35776  n_red=1232
+11:46:07 | INFO |     step 29000  loss=5.0338  grp_sp=0.017  n_imp=35776  n_red=1232
+11:53:09 | INFO |     step 29200  loss=5.0342  grp_sp=0.017  n_imp=35776  n_red=1232
+12:00:10 | INFO |     step 29400  loss=5.0337  grp_sp=0.017  n_imp=35776  n_red=1232
+2026-04-28 12:03:56,305 - GETA - INFO - Determining important and redundant groups using saliency scores. Step=29506
+12:07:15 | INFO |     step 29600  loss=5.0340  grp_sp=0.033  n_imp=35160  n_red=1848
+12:14:16 | INFO |     step 29800  loss=5.0334  grp_sp=0.033  n_imp=35160  n_red=1848
+12:21:27 | INFO |     step 30000  loss=5.0330  grp_sp=0.033  n_imp=35160  n_red=1848
+12:28:35 | INFO |     step 30200  loss=5.0323  grp_sp=0.033  n_imp=35160  n_red=1848
+12:35:41 | INFO |     step 30400  loss=5.0323  grp_sp=0.033  n_imp=35160  n_red=1848
+12:42:46 | INFO |     step 30600  loss=5.0325  grp_sp=0.033  n_imp=35160  n_red=1848
+12:49:50 | INFO |     step 30800  loss=5.0331  grp_sp=0.033  n_imp=35160  n_red=1848
+12:57:00 | INFO |     step 31000  loss=5.0342  grp_sp=0.033  n_imp=35160  n_red=1848
+13:04:05 | INFO |     step 31200  loss=5.0349  grp_sp=0.033  n_imp=35160  n_red=1848
+13:11:16 | INFO |     step 31400  loss=5.0359  grp_sp=0.033  n_imp=35160  n_red=1848
+13:18:24 | INFO |     step 31600  loss=5.0366  grp_sp=0.033  n_imp=35160  n_red=1848
+13:25:25 | INFO |     step 31800  loss=5.0367  grp_sp=0.033  n_imp=35160  n_red=1848
+13:32:28 | INFO |     step 32000  loss=5.0366  grp_sp=0.033  n_imp=35160  n_red=1848
+13:39:36 | INFO |     step 32200  loss=5.0361  grp_sp=0.033  n_imp=35160  n_red=1848
+13:46:38 | INFO |     step 32400  loss=5.0361  grp_sp=0.033  n_imp=35160  n_red=1848
+13:53:46 | INFO |     step 32600  loss=5.0357  grp_sp=0.033  n_imp=35160  n_red=1848
+14:00:50 | INFO |     step 32800  loss=5.0352  grp_sp=0.033  n_imp=35160  n_red=1848
+14:08:02 | INFO |     step 33000  loss=5.0350  grp_sp=0.033  n_imp=35160  n_red=1848
+14:15:11 | INFO |     step 33200  loss=5.0359  grp_sp=0.033  n_imp=35160  n_red=1848
+14:22:19 | INFO |     step 33400  loss=5.0357  grp_sp=0.033  n_imp=35160  n_red=1848
+14:29:25 | INFO |     step 33600  loss=5.0359  grp_sp=0.033  n_imp=35160  n_red=1848
+14:36:30 | INFO |     step 33800  loss=5.0352  grp_sp=0.033  n_imp=35160  n_red=1848
+14:43:40 | INFO |     step 34000  loss=5.0355  grp_sp=0.033  n_imp=35160  n_red=1848
+14:50:47 | INFO |     step 34200  loss=5.0371  grp_sp=0.033  n_imp=35160  n_red=1848
+14:57:53 | INFO |     step 34400  loss=5.0376  grp_sp=0.033  n_imp=35160  n_red=1848
+15:04:56 | INFO |     step 34600  loss=5.0380  grp_sp=0.033  n_imp=35160  n_red=1848
+15:11:55 | INFO |     step 34800  loss=5.0383  grp_sp=0.033  n_imp=35160  n_red=1848
+15:19:01 | INFO |     step 35000  loss=5.0383  grp_sp=0.033  n_imp=35160  n_red=1848
+15:26:03 | INFO |     step 35200  loss=5.0385  grp_sp=0.033  n_imp=35160  n_red=1848
+15:33:15 | INFO |     step 35400  loss=5.0384  grp_sp=0.033  n_imp=35160  n_red=1848
+15:40:20 | INFO |     step 35600  loss=5.0386  grp_sp=0.033  n_imp=35160  n_red=1848
+15:47:25 | INFO |     step 35800  loss=5.0388  grp_sp=0.033  n_imp=35160  n_red=1848
+15:54:22 | INFO |     step 36000  loss=5.0390  grp_sp=0.033  n_imp=35160  n_red=1848
+16:01:26 | INFO |     step 36200  loss=5.0394  grp_sp=0.033  n_imp=35160  n_red=1848
+16:08:27 | INFO |     step 36400  loss=5.0397  grp_sp=0.033  n_imp=35160  n_red=1848
+16:15:35 | INFO |     step 36600  loss=5.0407  grp_sp=0.033  n_imp=35160  n_red=1848
+16:22:37 | INFO |     step 36800  loss=5.0431  grp_sp=0.033  n_imp=35160  n_red=1848
+16:29:40 | INFO |     step 37000  loss=5.0447  grp_sp=0.033  n_imp=35160  n_red=1848
+16:36:42 | INFO |     step 37200  loss=5.0465  grp_sp=0.033  n_imp=35160  n_red=1848
+16:43:44 | INFO |     step 37400  loss=5.0487  grp_sp=0.033  n_imp=35160  n_red=1848
+16:50:42 | INFO |     step 37600  loss=5.0492  grp_sp=0.033  n_imp=35160  n_red=1848
+16:57:41 | INFO |     step 37800  loss=5.0496  grp_sp=0.033  n_imp=35160  n_red=1848
+17:04:38 | INFO |     step 38000  loss=5.0504  grp_sp=0.033  n_imp=35160  n_red=1848

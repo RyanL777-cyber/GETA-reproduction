@@ -1,0 +1,53 @@
+{
+  "sparsity": 0.1,
+  "actual_group_sparsity": 0.016645049718975184,
+  "exp_tag": "A2_slowproj",
+  "seed": 42,
+  "epochs": 3,
+  "batch_size": 4,
+  "lr": 3e-05,
+  "lr_quant": 0.0001,
+  "bit_reduction": 2,
+  "pruning_periods": 6,
+  "projection_periods": 6,
+  "min_bit_wt": 4,
+  "max_bit_wt": 16,
+  "calib_num_bits": 16,
+  "start_pruning_epoch": 2.5,
+  "pruning_end_epoch": null,
+  "lr_scheduler": "none",
+  "warmup_ratio": 0.1,
+  "train_subset_frac": 0.1,
+  "val_subset_n": 1000,
+  "best_f1": 78.9432410405286,
+  "best_epoch": 1,
+  "final_f1": 46.485830755570326,
+  "final_em": 35.4,
+  "compressed_em": 35.3,
+  "compressed_f1": 46.38583075557033,
+  "bops_million": 1942299.2661078349,
+  "params_million": 107.946832,
+  "epoch_log": [
+    {
+      "epoch": 1,
+      "loss": 2.0037910940418624,
+      "grp_sp": 0.0,
+      "em": 72.5,
+      "f1": 78.9432410405286
+    },
+    {
+      "epoch": 2,
+      "loss": 0.9344738880483936,
+      "grp_sp": 0.0,
+      "em": 71.8,
+      "f1": 78.51592944749119
+    },
+    {
+      "epoch": 3,
+      "loss": 2.2009016571319737,
+      "grp_sp": 0.016645049718975184,
+      "em": 35.4,
+      "f1": 46.485830755570326
+    }
+  ]
+}

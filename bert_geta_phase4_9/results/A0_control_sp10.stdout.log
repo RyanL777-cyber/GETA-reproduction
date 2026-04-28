@@ -1,0 +1,726 @@
+[gpu] CUDA_VISIBLE_DEVICES already set: 0
+19:00:22 | INFO | [log] ./results/phase5_20260427_190022.log
+19:00:22 | INFO | [env] torch=2.5.1+cu121  device=cuda
+19:00:22 | INFO | [cfg] sparsity=[0.1]  epochs=3  bs=4  lr=3e-05  lr_quant=0.0001  br=2  P=6  Kp=6  seed=42
+19:00:30 | INFO | [DATA] raw train=87599  raw val=10570
+19:00:30 | INFO | [DATA] train subsetted to 8759 (10%)
+19:00:30 | INFO | [DATA] val subsetted to 1000
+Map:   0%|          | 0/8759 [00:00<?, ? examples/s]Map:  11%|█▏        | 1000/8759 [00:04<00:31, 247.40 examples/s]Map:  23%|██▎       | 2000/8759 [00:06<00:20, 337.61 examples/s]Map:  34%|███▍      | 3000/8759 [00:08<00:13, 412.81 examples/s]Map:  46%|████▌     | 4000/8759 [00:09<00:10, 469.48 examples/s]Map:  57%|█████▋    | 5000/8759 [00:11<00:07, 507.41 examples/s]Map:  69%|██████▊   | 6000/8759 [00:13<00:05, 525.10 examples/s]Map:  80%|███████▉  | 7000/8759 [00:15<00:03, 502.01 examples/s]Map:  91%|█████████▏| 8000/8759 [00:16<00:01, 544.88 examples/s]Map: 100%|██████████| 8759/8759 [00:17<00:00, 592.33 examples/s]Map: 100%|██████████| 8759/8759 [00:17<00:00, 491.40 examples/s]
+19:00:48 | INFO | [DATA] train features=8848  val features=1020
+19:00:48 | INFO | 
+============================================================
+19:00:48 | INFO |   EXPERIMENT: sparsity=0.1  tag=A0_control_sp10
+19:00:48 | INFO | ============================================================
+19:00:48 | INFO | [M1] loading BERT QA
+19:00:51 | INFO | [M2] quantize wrap + STE fix
+2026-04-27 19:00:51,068 - quant_fix - INFO - STE fix applied to SymQuantizerNonLinear and SymQuantizerLinear
+2026-04-27 19:00:55,028 - only_train_once.quantization.quant_model - INFO - Converted 73 layers to quantized versions
+19:00:55 | INFO | [CALIB] running 8 batches of bs=4
+19:00:58 | INFO | [calib] 8 batches over 73 layers  (skipped=0)  num_bits=16  safety=1.05
+19:00:58 | INFO | [calib] observed max|x|: min=2.830  median=14.866  max=140.552
+19:00:58 | INFO | [M3] building OTO graph
+/home/h24116081/miniconda3/lib/python3.13/site-packages/transformers/modeling_attn_mask_utils.py:196: TracerWarning: torch.tensor results are registered as constants in the trace. You can safely ignore this warning if you use this function to create tensors out of constant variables that would be the same every time you call this function. In any other case, this might cause the trace to be incorrect.
+  inverted_mask = torch.tensor(1.0, dtype=dtype) - expanded_mask
+/home/h24116081/GETA reprocution/GETA-reproduction/geta/only_train_once/quantization/quant_layers.py:334: TracerWarning: torch.tensor results are registered as constants in the trace. You can safely ignore this warning if you use this function to create tensors out of constant variables that would be the same every time you call this function. In any other case, this might cause the trace to be incorrect.
+  weight_clip_val = torch.tensor(self.weight_clip_val, device=weight.device)
+/home/h24116081/GETA reprocution/GETA-reproduction/geta/only_train_once/quantization/quant_layers.py:335: TracerWarning: torch.tensor results are registered as constants in the trace. You can safely ignore this warning if you use this function to create tensors out of constant variables that would be the same every time you call this function. In any other case, this might cause the trace to be incorrect.
+  q_s = torch.tensor(0.0, device=weight.device)
+/home/h24116081/GETA reprocution/GETA-reproduction/geta/only_train_once/quantization/quant_layers.py:361: TracerWarning: torch.tensor results are registered as constants in the trace. You can safely ignore this warning if you use this function to create tensors out of constant variables that would be the same every time you call this function. In any other case, this might cause the trace to be incorrect.
+  activation_clip_val = torch.tensor(self.act_clip_val, device=activation.device)
+/home/h24116081/GETA reprocution/GETA-reproduction/geta/only_train_once/quantization/quant_layers.py:362: TracerWarning: torch.tensor results are registered as constants in the trace. You can safely ignore this warning if you use this function to create tensors out of constant variables that would be the same every time you call this function. In any other case, this might cause the trace to be incorrect.
+  q_s = torch.tensor(0.0, device=activation.device)
+OTO graph constructor
+graph build
+NodePattern mul None
+NodePattern transpose None
+NodePattern matmul None
+Post-processing of graph completed.
+Graph has 1102 nodes and 1177 edges.
+19:03:12 | INFO | [SCHED] steps/epoch=2212  total=6636  start_prune=1106 (0.50 ep)  prune_steps=5530 (2.50 ep)  prune_periods=6  proj_periods=6  proj_steps=1106 (0.50 ep)
+19:03:12 | INFO | [BIT]   min_bit_wt=4  max_bit_wt=16  bit_reduction=2  calib_num_bits=16
+19:03:12 | INFO | [LR]    scheduler=none  warmup_ratio=0.1  lr=3e-05  lr_quant=0.0001
+19:03:12 | INFO | [M4] building GETA optimizer
+2026-04-27 19:03:12,017 - GETA - INFO - Set19:03:52 | INFO |     step 400  loss=3.4077  grp_sp=0.000  n_imp=37008  n_red=1919:10:45 | INFO |     step 600  loss=2.9894  grp_sp=0.000  n_imp=37008  n_red=0
+19:17:36 | INFO |     step 800  loss=2.7209  grp_sp=0.000  n_imp=37008  n_red=0
+19:24:31 | INFO |     step 1000  loss=2.5361  grp_sp=0.000  n_imp=37008  n_red=0
+19:31:14 | INFO |     step 1200  loss=2.4141  grp_sp=0.000  n_imp=37008  n_red=0
+19:37:52 | INFO |     step 1400  loss=2.3059  grp_sp=0.000  n_imp=37008  n_red=0
+19:44:34 | INFO |     step 1600  loss=2.2097  grp_sp=0.000  n_imp=37008  n_red=0
+19:51:13 | INFO |     step 1800  loss=2.1363  grp_sp=0.000  n_imp=37008  n_red=0
+19:58:03 | INFO |     step 2000  loss=2.0855  grp_sp=0.000  n_imp=37008  n_red=0
+20:04:36 | INFO |     step 2200  loss=2.0389  grp_sp=0.000  n_imp=37008  n_red=0
+20:10:30 | INFO |     step 2400  loss=1.9998  grp_sp=0.000  n_imp=37008  n_red=0
+20:16:19 | INFO |     step 2600  loss=1.9632  grp_sp=0.000  n_imp=37008  n_red=0
+20:22:16 | INFO |     step 2800  loss=1.9238  grp_sp=0.000  n_imp=37008  n_red=0
+20:28:15 | INFO |     step 3000  loss=1.8929  grp_sp=0.000  n_imp=37008  n_red=0
+20:34:20 | INFO |     step 3200  loss=1.8650  grp_sp=0.000  n_imp=37008  n_red=0
+20:40:37 | INFO |     step 3400  loss=1.8361  grp_sp=0.000  n_imp=37008  n_red=0
+20:46:32 | INFO |     step 3600  loss=1.8116  grp_sp=0.000  n_imp=37008  n_red=0
+20:52:24 | INFO |     step 3800  loss=1.7905  grp_sp=0.000  n_imp=37008  n_red=0
+20:58:34 | INFO |     step 4000  loss=1.7697  grp_sp=0.000  n_imp=37008  n_red=0
+21:04:57 | INFO |     step 4200  loss=1.7490  grp_sp=0.000  n_imp=37008  n_red=0
+21:11:04 | INFO |     step 4400  loss=1.7288  grp_sp=0.000  n_imp=37008  n_21:12:21:17:05 | INFO |     step 4600  loss=1.7124  grp_sp=0.000  n_imp=37008  n_red=0
+21:23:31 | INFO |     step 4800  loss=1.6987  grp_sp=0.000  n_imp=37008  n_red=0
+21:29:25 | INFO |     step 5000  loss=1.6808  grp_sp=0.000  n_imp=37008  n_red=0
+21:35:44 | INFO |     step 5200  loss=1.6647  grp_sp=0.000  n_imp=37008  n_red=0
+21:41:58 | INFO |     step 5400  loss=1.6509  grp_sp=0.000  n_imp=37008  n_red=0
+21:48:18 | INFO |     step 5600  loss=1.6410  grp_21:52:29 | INFO |     step 260021:54:32 | INFO |     step 5800  loss=1.6255  grp_sp=22:04:30 | INFO |     step 2800  loss=2.6590  grp_sp=0.017  n_imp=35776  n_red=1232
+2026-04-27 22:11:38,401 - GETA - INFO - Determining important and redundant groups using saliency scores. 22:16:02 | INFO |     step 6400  loss=1.5954  grp_sp=0.000  n_imp=37008  n_red=0
+22:23:03 | IN22:26:54 | INFO |     step 3200  loss=2.6107  grp_sp=0.033  n_imp=3522:30:07 | INFO 22:37:14 | INFO |     step 3400  loss=2.5713  grp_sp=0.033  n_imp=35160  n_red=1848
+22:50:15 | INFO |     step 3600  loss=2.5452  grp_sp=0.033  n_imp=35160  n_red=1848
+23:02:41 | INFO |     step 3800  loss=2.5452  grp_sp=0.033  n_imp=35160  n_red=1848
+2026-04-27 23:07:24,401 - GETA - INFO - Determining important and redundant groups using saliency scores. Step=3870
+2026-04-27 23:07:25,328 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate t23:11:49 | INFO |     step 8000  loss=1.5302  grp_sp=0.000  n_imp=37008  n_red=0
+23:18:45 | INFO |     step 8200  loss=1.5232  grp_sp=0.000  n_imp=37008  n_red=0
+23:25:53 | INFO |     step 8400  loss=1.5159  grp_sp=0.000  n_imp=37008  n_red=0
+23:32:34 | INFO |     step 8600  loss=1.5085  grp_sp=0.000  n_imp=37008  n_red=0
+23:39:49 | INFO |     step 8800  loss=1.5017  grp_sp=0.000  n_imp=37008  n_red=0
+23:47:06 | INFO |     step 9000  loss=1.4960  grp_sp=0.000  n_imp=37008  n_red=0
+23:54:01 | INFO |     step 9200  loss=1.4905  grp_sp=0.000  n_imp=37008  n_red=0
+00:00:59 | INFO |     step 9400  loss=1.5028  grp_sp=0.000  n_imp=37008  n_red=0
+00:08:53 | INFO |     step 9600  loss=1.5045  grp_sp=0.000  n_imp=37008  n_red=0
+00:16:31 | INFO |     step 9800  loss=1.5042  grp_sp=0.000  n_imp=37008  n_red=0
+00:23:51 | INFO |     step 10000  loss=1.5024  grp_sp=0.000  n_imp=37008  n_red=0
+00:30:58 | INFO |     step 10200  loss=1.5003  grp_sp=0.000  n_imp=37008  n_red=0
+00:38:37 | INFO |     step 10400  loss=1.4973  grp_sp=0.000  n_imp=37008  n_red=0
+00:45:59 | INFO |     step 10600  loss=1.4957  grp_sp=0.000  n_imp=37008  n_red=0
+00:53:10 | INFO |     step 10800  loss=1.4917  grp_sp=0.000  n_imp=37008  n_red=0
+00:59:58 | INFO |     step 11000  loss=1.4900  grp_sp=0.000  n_imp=37008  n_red=0
+2026-04-28 01:02:16,641 - GETA - INFO - Determining important and redundant groups using saliency scores. Step=11066
+01:07:28 | INFO |     step 11200  loss=1.5299  grp_sp=0.000  n_imp=36392  n_red=616
+01:15:09 | INFO |     step 11400  loss=1.5635  grp_sp=0.000  n_imp=36392  n_red=616
+01:23:00 | INFO |     step 11600  loss=1.5854  grp_sp=0.000  n_imp=36392  n_red=616
+01:30:58 | INFO |     step 11800  loss=1.6025  grp_sp=0.000  n_imp=36392  n_red=616
+01:38:54 | INFO |     step 12000  loss=1.6193  grp_sp=0.000  n_imp=36392  n_red=616
+01:46:40 | INFO |     step 12200  loss=1.6323  grp_sp=0.000  n_imp=36392  n_red=616
+01:54:41 | INFO |     step 12400  loss=1.6437  grp_sp=0.000  n_imp=36392  n_red=616
+02:03:12 | INFO |     step 12600  loss=1.6532  grp_sp=0.000  n_imp=36392  n_red=616
+02:12:06 | INFO |     step 12800  loss=1.6591  grp_sp=0.000  n_imp=36392  n_red=616
+02:19:45 | INFO |     step 13000  loss=1.6660  grp_sp=0.000  n_imp=36392  n_red=616
+02:27:22 | INFO |     step 13200  loss=1.6737  grp_sp=0.000  n_imp=36392  n_red=616
+02:35:04 | INFO |     step 13400  loss=1.6795  grp_sp=0.000  n_imp=36392  n_red=616
+02:41:58 | INFO |     step 13600  loss=1.6853  grp_sp=0.000  n_imp=36392  n_red=616
+02:48:55 | INFO |     step 13800  loss=1.6906  grp_sp=0.000  n_imp=36392  n_red=616
+02:56:15 | INFO |     step 14000  loss=1.6953  grp_sp=0.000  n_imp=36392  n_red=616
+03:03:55 | INFO |     step 14200  loss=1.6991  grp_sp=0.000  n_imp=36392  n_red=616
+03:11:40 | INFO |     step 14400  loss=1.7039  grp_sp=0.000  n_imp=36392  n_red=616
+03:19:07 | INFO |     step 14600  loss=1.7072  grp_sp=0.000  n_imp=36392  n_red=616
+03:26:33 | INFO |     step 14800  loss=1.7120  grp_sp=0.000  n_imp=36392  n_red=616
+03:33:59 | INFO |     step 15000  loss=1.7151  grp_sp=0.000  n_imp=36392  n_red=616
+03:41:22 | INFO |     step 15200  loss=1.7193  grp_sp=0.000  n_imp=36392  n_red=616
+03:48:27 | INFO |     step 15400  loss=1.7238  grp_sp=0.000  n_imp=36392  n_red=616
+03:55:46 | INFO |     step 15600  loss=1.7280  grp_sp=0.000  n_imp=36392  n_red=616
+04:03:34 | INFO |     step 15800  loss=1.7321  grp_sp=0.000  n_imp=36392  n_red=616
+04:11:31 | INFO |     step 16000  loss=1.7357  grp_sp=0.000  n_imp=36392  n_red=616
+04:19:19 | INFO |     step 16200  loss=1.7391  grp_sp=0.000  n_imp=36392  n_red=616
+04:26:28 | INFO |     step 16400  loss=1.7429  grp_sp=0.000  n_imp=36392  n_red=616
+04:33:37 | INFO |     step 16600  loss=1.7457  grp_sp=0.000  n_imp=36392  n_red=616
+04:41:02 | INFO |     step 16800  loss=1.7478  grp_sp=0.000  n_imp=36392  n_red=616
+04:48:57 | INFO |     step 17000  loss=1.7505  grp_sp=0.000  n_imp=36392  n_red=616
+04:56:40 | INFO |     step 17200  loss=1.7525  grp_sp=0.000  n_imp=36392  n_red=616
+05:04:16 | INFO |     step 17400  loss=1.7553  grp_sp=0.000  n_imp=36392  n_red=616
+05:12:09 | INFO |     step 17600  loss=1.7577  grp_sp=0.000  n_imp=36392  n_red=616
+05:19:50 | INFO |     step 17800  loss=1.7593  grp_sp=0.000  n_imp=36392  n_red=616
+05:27:30 | INFO |     step 18000  loss=1.7607  grp_sp=0.000  n_imp=36392  n_red=616
+05:35:18 | INFO |     step 18200  loss=1.7618  grp_sp=0.000  n_imp=36392  n_red=616
+05:43:10 | INFO |     step 18400  loss=1.7631  grp_sp=0.000  n_imp=36392  n_red=616
+05:50:54 | INFO |     step 18600  loss=1.7636  grp_sp=0.000  n_imp=36392  n_red=616
+05:58:58 | INFO |     step 18800  loss=1.7656  grp_sp=0.000  n_imp=36392  n_red=616
+06:06:52 | INFO |     step 19000  loss=1.7674  grp_sp=0.000  n_imp=36392  n_red=616
+06:14:35 | INFO |     step 19200  loss=1.7696  grp_sp=0.000  n_imp=36392  n_red=616
+06:22:20 | INFO |     step 19400  loss=1.7717  grp_sp=0.000  n_imp=36392  n_red=616
+06:30:00 | INFO |     step 19600  loss=1.7736  grp_sp=0.000  n_imp=36392  n_red=616
+06:37:33 | INFO |     step 19800  loss=1.7752  grp_sp=0.000  n_imp=36392  n_red=616
+06:45:23 | INFO |     step 20000  loss=1.7767  grp_sp=0.000  n_imp=36392  n_red=616
+06:52:53 | INFO |     step 20200  loss=1.7778  grp_sp=0.000  n_imp=36392  n_red=616
+2026-04-28 06:56:14,633 - GETA - INFO - Determining important and redundant groups using saliency scores. Step=20286
+07:01:13 | INFO |     step 20400  loss=1.7820  grp_sp=0.017  n_imp=35776  n_red=1232
+07:09:19 | INFO |     step 20600  loss=1.7850  grp_sp=0.017  n_imp=35776  n_red=1232
+07:16:56 | INFO |     step 20800  loss=1.7873  grp_sp=0.017  n_imp=35776  n_red=1232
+07:24:53 | INFO |     step 21000  loss=1.7893  grp_sp=0.017  n_imp=35776  n_red=1232
+07:33:06 | INFO |     step 21200  loss=1.7906  grp_sp=0.017  n_imp=35776  n_red=1232
+07:40:43 | INFO |     step 21400  loss=1.7920  grp_sp=0.017  n_imp=35776  n_red=1232
+07:49:20 | INFO |     step 21600  loss=1.7941  grp_sp=0.017  n_imp=35776  n_red=1232
+07:58:10 | INFO |     step 21800  loss=1.7950  grp_sp=0.017  n_imp=35776  n_red=1232
+08:05:56 | INFO |     step 22000  loss=1.7969  grp_sp=0.017  n_imp=35776  n_red=1232
+08:18:08 | INFO | [EPOCH 1/3] loss=1.7978  grp_sp=0.017  EM=58.16  F1=69.18  elapsed=800.9min
+08:20:48 | INFO |     step 22200  loss=1.6097  grp_sp=0.017  n_imp=35776  n_red=1232
+08:28:40 | INFO |     step 22400  loss=1.6886  grp_sp=0.017  n_imp=35776  n_red=1232
+08:36:10 | INFO |     step 22600  loss=1.6501  grp_sp=0.017  n_imp=35776  n_red=1232
+08:43:05 | INFO |     step 22800  loss=1.6786  grp_sp=0.017  n_imp=35776  n_red=1232
+08:50:05 | INFO |     step 23000  loss=1.6929  grp_sp=0.017  n_imp=35776  n_red=1232
+08:56:59 | INFO |     step 23200  loss=1.7077  grp_sp=0.017  n_imp=35776  n_red=1232
+09:03:47 | INFO |     step 23400  loss=1.7159  grp_sp=0.017  n_imp=35776  n_red=1232
+09:10:46 | INFO |     step 23600  loss=1.7178  grp_sp=0.017  n_imp=35776  n_red=1232
+09:17:38 | INFO |     step 23800  loss=1.7085  grp_sp=0.017  n_imp=35776  n_red=1232
+09:24:30 | INFO |     step 24000  loss=1.7050  grp_sp=0.017  n_imp=35776  n_red=1232
+09:31:29 | INFO |     step 24200  loss=1.7009  grp_sp=0.017  n_imp=35776  n_red=1232
+09:38:19 | INFO |     step 24400  loss=1.6933  grp_sp=0.017  n_imp=35776  n_red=1232
+09:45:10 | INFO |     step 24600  loss=1.6937  grp_sp=0.017  n_imp=35776  n_red=1232
+09:52:01 | INFO |     step 24800  loss=1.6972  grp_sp=0.017  n_imp=35776  n_red=1232
+09:58:49 | INFO |     step 25000  loss=1.6980  grp_sp=0.017  n_imp=35776  n_red=1232
+10:05:38 | INFO |     step 25200  loss=1.6941  grp_sp=0.017  n_imp=35776  n_red=1232
+10:12:37 | INFO |     step 25400  loss=1.6924  grp_sp=0.017  n_imp=35776  n_red=1232
+10:19:35 | INFO |     step 25600  loss=1.6924  grp_sp=0.017  n_imp=35776  n_red=1232
+10:26:32 | INFO |     step 25800  loss=1.6897  grp_sp=0.017  n_imp=35776  n_red=1232
+10:33:28 | INFO |     step 26000  loss=1.6926  grp_sp=0.017  n_imp=35776  n_red=1232
+10:40:24 | INFO |     step 26200  loss=1.6905  grp_sp=0.017  n_imp=35776  n_red=1232
+10:47:22 | INFO |     step 26400  loss=1.6868  grp_sp=0.017  n_imp=35776  n_red=1232
+10:54:21 | INFO |     step 26600  loss=1.6877  grp_sp=0.017  n_imp=35776  n_red=1232
+11:01:19 | INFO |     step 26800  loss=1.6882  grp_sp=0.017  n_imp=35776  n_red=1232
+11:08:12 | INFO |     step 27000  loss=1.6891  grp_sp=0.017  n_imp=35776  n_red=1232
+11:15:14 | INFO |     step 27200  loss=1.6891  grp_sp=0.017  n_imp=35776  n_red=1232
+11:22:18 | INFO |     step 27400  loss=1.6871  grp_sp=0.017  n_imp=35776  n_red=1232
+11:29:17 | INFO |     step 27600  loss=1.6840  grp_sp=0.017  n_imp=35776  n_red=1232
+11:36:09 | INFO |     step 27800  loss=1.6827  grp_sp=0.017  n_imp=35776  n_red=1232
+11:43:06 | INFO |     step 28000  loss=1.6813  grp_sp=0.017  n_imp=35776  n_red=1232
+11:49:58 | INFO |     step 28200  loss=1.6783  grp_sp=0.017  n_imp=35776  n_red=1232
+11:56:49 | INFO |     step 28400  loss=1.6758  grp_sp=0.017  n_imp=35776  n_red=1232
+12:03:38 | INFO |     step 28600  loss=1.6741  grp_sp=0.017  n_imp=35776  n_red=1232
+12:10:26 | INFO |     step 28800  loss=1.6727  grp_sp=0.017  n_imp=35776  n_red=1232
+12:17:17 | INFO |     step 29000  loss=1.6733  grp_sp=0.017  n_imp=35776  n_red=1232
+12:24:03 | INFO |     step 29200  loss=1.6730  grp_sp=0.017  n_imp=35776  n_red=1232
+12:30:55 | INFO |     step 29400  loss=1.6726  grp_sp=0.017  n_imp=35776  n_red=1232
+2026-04-28 12:34:36,432 - GETA - INFO - Determining important and redundant groups using saliency scores. Step=29506
+12:37:53 | INFO |     step 29600  loss=1.6727  grp_sp=0.033  n_imp=35160  n_red=1848
+12:44:56 | INFO |     step 29800  loss=1.6711  grp_sp=0.033  n_imp=35160  n_red=1848
+12:51:58 | INFO |     step 30000  loss=1.6708  grp_sp=0.033  n_imp=35160  n_red=1848
+12:58:58 | INFO |     step 30200  loss=1.6718  grp_sp=0.033  n_imp=35160  n_red=1848
+13:05:56 | INFO |     step 30400  loss=1.6715  grp_sp=0.033  n_imp=35160  n_red=1848
+13:12:48 | INFO |     step 30600  loss=1.6733  grp_sp=0.033  n_imp=35160  n_red=1848
+13:19:44 | INFO |     step 30800  loss=1.6709  grp_sp=0.033  n_imp=35160  n_red=1848
+13:26:45 | INFO |     step 31000  loss=1.6698  grp_sp=0.033  n_imp=35160  n_red=1848
+13:33:45 | INFO |     step 31200  loss=1.6672  grp_sp=0.033  n_imp=35160  n_red=1848
+13:40:51 | INFO |     step 31400  loss=1.6654  grp_sp=0.033  n_imp=35160  n_red=1848
+13:47:56 | INFO |     step 31600  loss=1.6622  grp_sp=0.033  n_imp=35160  n_red=1848
+13:54:57 | INFO |     step 31800  loss=1.6618  grp_sp=0.033  n_imp=35160  n_red=1848
+14:01:59 | INFO |     step 32000  loss=1.6608  grp_sp=0.033  n_imp=35160  n_red=1848
+14:08:59 | INFO |     step 32200  loss=1.6597  grp_sp=0.033  n_imp=35160  n_red=1848
+14:16:07 | INFO |     step 32400  loss=1.6583  grp_sp=0.033  n_imp=35160  n_red=1848
+14:23:08 | INFO |     step 32600  loss=1.6578  grp_sp=0.033  n_imp=35160  n_red=1848
+14:30:08 | INFO |     step 32800  loss=1.6570  grp_sp=0.033  n_imp=35160  n_red=1848
+14:37:07 | INFO |     step 33000  loss=1.6560  grp_sp=0.033  n_imp=35160  n_red=1848
+14:44:08 | INFO |     step 33200  loss=1.6546  grp_sp=0.033  n_imp=35160  n_red=1848
+14:51:14 | INFO |     step 33400  loss=1.6532  grp_sp=0.033  n_imp=35160  n_red=1848
+14:58:12 | INFO |     step 33600  loss=1.6517  grp_sp=0.033  n_imp=35160  n_red=1848
+15:05:12 | INFO |     step 33800  loss=1.6504  grp_sp=0.033  n_imp=35160  n_red=1848
+15:12:15 | INFO |     step 34000  loss=1.6496  grp_sp=0.033  n_imp=35160  n_red=1848
+15:19:13 | INFO |     step 34200  loss=1.6472  grp_sp=0.033  n_imp=35160  n_red=1848
+15:26:13 | INFO |     step 34400  loss=1.6463  grp_sp=0.033  n_imp=35160  n_red=1848
+15:33:13 | INFO |     step 34600  loss=1.6462  grp_sp=0.033  n_imp=35160  n_red=1848
+15:40:17 | INFO |     step 34800  loss=1.6452  grp_sp=0.033  n_imp=35160  n_red=1848
+15:47:21 | INFO |     step 35000  loss=1.6445  grp_sp=0.033  n_imp=35160  n_red=1848
+15:54:13 | INFO |     step 35200  loss=1.6428  grp_sp=0.033  n_imp=35160  n_red=1848
+16:01:05 | INFO |     step 35400  loss=1.6411  grp_sp=0.033  n_imp=35160  n_red=1848
+16:07:59 | INFO |     step 35600  loss=1.6404  grp_sp=0.033  n_imp=35160  n_red=1848
+16:14:47 | INFO |     step 35800  loss=1.6381  grp_sp=0.033  n_imp=35160  n_red=1848
+16:21:37 | INFO |     step 36000  loss=1.6376  grp_sp=0.033  n_imp=35160  n_red=1848
+16:28:31 | INFO |     step 36200  loss=1.6378  grp_sp=0.033  n_imp=35160  n_red=1848
+16:35:24 | INFO |     step 36400  loss=1.6355  grp_sp=0.033  n_imp=35160  n_red=1848
+16:42:20 | INFO |     step 36600  loss=1.6337  grp_sp=0.033  n_imp=35160  n_red=1848
+16:49:14 | INFO |     step 36800  loss=1.6327  grp_sp=0.033  n_imp=35160  n_red=1848
+16:56:02 | INFO |     step 37000  loss=1.6317  grp_sp=0.033  n_imp=35160  n_red=1848
+17:02:50 | INFO |     step 37200  loss=1.6292  grp_sp=0.033  n_imp=35160  n_red=1848
+:25:57 | INFO |     step 37400  loss=1.6284  grp_sp=0.033  n_imp=35160  n_red=1848
+16:32:50 | INFO |     step 37600  loss=1.6281  grp_sp=0.033  n_imp=35160  n_red=1848
+16:39:48 | INFO |     step 37800  loss=1.6280  grp_sp=0.033  n_imp=35160  n_red=1848
+16:46:36 | INFO |     step 38000  loss=1.6265  grp_sp=0.033  n_imp=35160  n_red=1848
+16:53:28 | INFO |     step 38200  loss=1.6254  grp_sp=0.033  n_imp=35160  n_red=1848
+17:00:18 | INFO |     step 38400  loss=1.6253  grp_sp=0.033  n_imp=35160  n_red=1848
+17:07:09 | INFO |     step 38600  loss=1.6242  grp_sp=0.033  n_imp=35160  n_red=1848
+- WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:14:19,580 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:14:23,252 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:14:26,937 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:14:30,106 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:14:33,838 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+23:14:33 | INFO |     step 4000  loss=2.5293  grp_sp=0.050  n_imp=34544  n_red=2464
+2026-04-27 23:14:37,443 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:14:40,910 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:14:43,906 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:14:47,715 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:14:51,030 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:14:54,306 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:14:56,694 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:14:59,383 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:15:01,899 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:15:05,211 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:15:08,271 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:15:11,814 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:15:15,156 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:15:18,755 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:15:21,169 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:15:24,190 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:15:26,145 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:15:29,823 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:15:32,307 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:15:34,988 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:15:37,809 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:15:40,781 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:15:43,218 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:15:46,725 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:15:51,058 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:15:54,528 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:15:57,093 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:16:00,082 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:16:02,931 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:16:05,596 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:16:09,022 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:16:12,688 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:16:16,144 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:16:20,168 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:16:22,968 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:16:25,795 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:16:29,166 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:16:31,650 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:16:33,634 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:16:36,929 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:16:39,905 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:16:42,791 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:16:47,095 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:16:50,525 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:16:53,742 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:16:56,869 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:16:59,459 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:17:02,970 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:17:06,537 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:17:10,764 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:17:13,368 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:17:16,733 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:17:19,873 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:17:22,965 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:17:26,519 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:17:29,623 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:17:32,287 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:17:34,451 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:17:37,889 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:17:40,845 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:17:43,436 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:17:46,312 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:17:49,443 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:17:52,026 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:17:54,902 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:17:58,488 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:18:01,751 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:18:05,532 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:18:08,947 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:18:12,083 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:18:14,018 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:18:17,771 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:18:20,982 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:18:24,440 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:18:27,702 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:18:31,406 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:18:34,644 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:18:38,102 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:18:41,973 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:18:44,349 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:18:47,009 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:18:50,719 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:18:54,424 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:18:57,306 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:19:00,226 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:19:03,113 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:19:06,221 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:19:09,843 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:19:13,187 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:19:16,539 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:19:19,237 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:19:21,350 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:19:23,139 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:19:26,682 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:19:31,566 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:19:34,757 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:19:37,292 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:19:40,620 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:19:44,117 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:19:47,164 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:19:51,025 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:19:54,278 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:19:57,614 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:20:01,015 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:20:03,124 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:20:06,408 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:20:07,894 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:20:09,005 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:20:14,049 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:20:19,755 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:20:20,683 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:20:21,150 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:20:24,882 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:20:30,298 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:20:35,094 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:20:39,837 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:20:44,687 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:20:49,257 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:20:54,469 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:20:58,525 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:21:04,087 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:21:08,583 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:21:13,571 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:21:18,632 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:21:23,695 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:21:29,261 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:21:33,731 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:21:38,922 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:21:43,336 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:21:48,432 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:21:54,714 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:22:00,076 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:22:05,007 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:22:10,037 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:22:14,827 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:22:20,199 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:22:25,057 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:22:29,892 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:22:34,874 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:22:41,025 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:22:45,927 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:22:51,685 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:22:54,878 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:22:59,079 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:23:03,746 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:23:07,577 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:23:12,466 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:23:17,064 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:23:20,812 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:23:25,823 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:23:31,054 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:23:36,050 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:23:41,839 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:23:47,868 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:23:52,632 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:23:58,180 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:24:03,652 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:24:07,965 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:24:13,180 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:24:18,374 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:24:23,969 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:24:29,783 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:24:34,967 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:24:39,338 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:24:44,980 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:24:50,169 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:24:54,998 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:25:00,673 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:25:05,574 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:25:10,603 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:25:15,451 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:25:20,878 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:25:25,069 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:25:29,818 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:25:34,621 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:25:38,867 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:25:43,967 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:25:48,982 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:25:54,250 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:25:59,511 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:26:05,651 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:26:10,210 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:26:15,051 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:26:21,015 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:26:25,377 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:26:30,089 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:26:35,059 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:26:40,638 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:26:45,084 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:26:51,003 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:26:55,937 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:27:00,577 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:27:05,559 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:27:09,938 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:27:14,350 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:27:19,682 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:27:23,621 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:27:27,268 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:27:30,619 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:27:34,246 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+23:27:34 | INFO |     step 4200  loss=2.5135  grp_sp=0.050  n_imp=34544  n_red=2464
+2026-04-27 23:27:37,601 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:27:39,940 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:27:42,349 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:27:45,588 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:27:49,046 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:27:51,033 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:27:54,445 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:27:57,436 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:28:00,886 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:28:04,508 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:28:07,240 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:28:10,358 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:28:12,799 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:28:16,802 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:28:20,255 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:28:23,615 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:28:25,590 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:28:27,776 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:28:31,064 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:28:34,308 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:28:37,114 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:28:40,409 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:28:44,444 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:28:48,230 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:28:50,982 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:28:53,801 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:28:55,518 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:28:57,731 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:29:01,217 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:29:04,549 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:29:06,800 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:29:10,137 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:29:13,190 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:29:16,564 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:29:19,968 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:29:23,040 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:29:26,728 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:29:30,298 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:29:33,751 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:29:36,165 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:29:39,508 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:29:42,424 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:29:45,625 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:29:49,753 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:29:52,991 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:29:55,684 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:29:59,682 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:30:03,507 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:30:05,602 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:30:08,483 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:30:11,087 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:30:14,569 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:30:18,995 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:30:22,817 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:30:26,278 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:30:29,342 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:30:32,693 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:30:36,056 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:30:38,950 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:30:42,253 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:30:45,348 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:30:47,320 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:30:50,917 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:30:54,387 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:30:58,279 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:31:01,774 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:31:04,972 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:31:08,396 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:31:11,663 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:31:14,926 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:31:17,546 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:31:19,594 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:31:23,028 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:31:26,310 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:31:29,754 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:31:33,502 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:31:36,666 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:31:39,309 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:31:42,299 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:31:45,660 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:31:49,093 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:31:51,121 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:31:54,598 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:31:57,898 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:32:01,694 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:32:05,113 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:32:08,938 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:32:11,866 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:32:15,107 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:32:17,835 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:32:19,760 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:32:23,002 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:32:26,171 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:32:28,372 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:32:30,173 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:32:31,703 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:32:35,038 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:32:38,428 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:32:41,706 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:32:44,660 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:32:48,430 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:32:51,409 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:32:54,062 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:32:56,505 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:32:59,027 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:33:01,491 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:33:04,934 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:33:08,024 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:33:11,564 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:33:14,753 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:33:18,145 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:33:21,632 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:33:25,339 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:33:28,952 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:33:32,181 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:33:35,433 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:33:37,963 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:33:40,663 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:33:43,224 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:33:45,304 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:33:48,657 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:33:52,018 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:33:55,007 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:33:58,734 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:34:00,713 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:34:04,783 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:34:08,497 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:34:11,821 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:34:15,561 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:34:18,909 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:34:22,266 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:34:25,670 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:34:28,241 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:34:31,238 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:34:34,786 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:34:38,389 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:34:41,904 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:34:44,141 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:34:46,272 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:34:50,555 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:34:53,997 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:34:57,906 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:35:01,361 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:35:04,367 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:35:08,315 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:35:11,697 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:35:15,175 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:35:18,107 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:35:21,724 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:35:24,820 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:35:28,441 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:35:32,249 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:35:35,589 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:35:38,842 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:35:42,649 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:35:45,973 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:35:49,471 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:35:52,868 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:35:55,734 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:35:58,273 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:36:01,345 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:36:04,892 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:36:07,949 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:36:11,730 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:36:15,143 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:36:18,615 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:36:23,289 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:36:26,448 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:36:29,853 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:36:32,899 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:36:35,304 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:36:37,030 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:36:40,286 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:36:43,842 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:36:46,655 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:36:49,376 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:36:52,385 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:36:56,399 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:36:59,851 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:37:03,125 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:37:05,731 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:37:09,379 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:37:14,194 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:37:17,480 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:37:20,887 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:37:23,439 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:37:26,808 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:37:29,880 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:37:33,262 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:37:36,674 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:37:39,274 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:37:42,680 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:37:46,059 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:37:50,293 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:37:54,346 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:37:57,750 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:38:00,701 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:38:03,057 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:38:05,951 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:38:08,312 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+23:38:08 | INFO |     step 4400  loss=2.4898  grp_sp=0.050  n_imp=34544  n_red=2464
+2026-04-27 23:38:11,235 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:38:14,612 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:38:16,920 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:38:19,777 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:38:23,471 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:38:26,825 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:38:30,006 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:38:32,505 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:38:35,781 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:38:39,166 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:38:42,040 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:38:45,373 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:38:47,849 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:38:50,866 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:38:53,986 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:38:56,629 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:39:00,795 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:39:04,121 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:39:07,446 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:39:11,001 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:39:14,627 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:39:18,156 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:39:21,665 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:39:25,017 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+23:40:27 | INFO | [EPOCH 2/3] loss=2.4870  grp_sp=0.050  EM=46.60  F1=56.72  elapsed=276.2min
+2026-04-27 23:40:30,737 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:40:34,204 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:40:37,927 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:40:41,478 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:40:44,552 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:40:47,905 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:40:52,113 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:40:54,533 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:40:56,939 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:41:00,076 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:41:02,224 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:41:05,048 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:41:08,433 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:41:11,793 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:41:14,178 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:41:17,052 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:41:18,777 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:41:20,485 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:41:22,738 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:41:25,884 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:41:28,327 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:41:30,303 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:41:33,517 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:41:35,580 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:41:38,634 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:41:41,792 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:41:44,936 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:41:47,660 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+2026-04-27 23:41:51,883 - GETA - WARNING - cosine_similarity_clip is inf or nan, setting forget rate to 0.0
+23:52:15 | INFO |     step 4600  loss=1.7445  grp_sp=0.050  n_imp=34544  n_red=2464
+2026-04-28 00:02:20,346 - GETA - INFO - Determining important and redundant groups using saliency scores. Step=4791
+00:02:53 | INFO |     step 4800  loss=1.7973  grp_sp=0.067  n_imp=33928  n_red=3080
+00:16:04 | INFO |     step 5000  loss=1.8157  grp_sp=0.067  n_imp=33928  n_red=3080
+00:26:44 | INFO |     step 5200  loss=1.8240  grp_sp=0.067  n_imp=33928  n_red=3080
+00:39:28 | INFO |     step 5400  loss=1.8260  grp_sp=0.067  n_imp=33928  n_red=3080
+00:51:22 | INFO |     step 5600  loss=1.8346  grp_sp=0.067  n_imp=33928  n_red=3080
+2026-04-28 00:58:30,127 - GETA - INFO - Determining important and redundant groups using saliency scores. Step=5712
+01:03:17 | INFO |     step 5800  loss=1.8398  grp_sp=0.083  n_imp=33308  n_red=3700
+01:16:25 | INFO |     step 6000  loss=1.8329  grp_sp=0.083  n_imp=33308  n_red=3700
+01:27:14 | INFO |     step 6200  loss=1.8372  grp_sp=0.083  n_imp=33308  n_red=3700
+01:39:51 | INFO |     step 6400  loss=1.8455  grp_sp=0.083  n_imp=33308  n_red=3700
+01:50:20 | INFO |     step 6600  loss=1.8397  grp_sp=0.083  n_imp=33308  n_red=3700
+01:53:06 | INFO | [EPOCH 3/3] loss=1.8399  grp_sp=0.100  EM=46.70  F1=57.36  elapsed=408.9min
+01:53:06 | INFO | [TRAIN] done. best F1=57.36 @ ep3 (pre-compression)  final F1=57.36
+01:53:06 | INFO | [FINAL] target sparsity=0.1  actual=0.1000
+01:53:06 | INFO | [SUBNET] constructing compressed model
+01:53:09 | INFO | [SUBNET] full  : ./results/A0_control_sp10/BertForQuestionAnswering_full_group_sparse.pt
+01:53:09 | INFO | [SUBNET] comp  : ./results/A0_control_sp10/BertForQuestionAnswering_compressed.pt
+/home/h24116081/GETA reprocution/GETA-reproduction/bert_geta_phase4_9/run_experiment.py:571: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  compressed_model = torch.load(oto.compressed_model_path, map_location=DEVICE)
+01:54:31 | INFO | [METRICS] BOPs=1815877.5M  params=103.21M
+01:54:31 | INFO | [EVAL compressed] EM=46.60  F1=57.30
+01:54:31 | INFO | [SAVE] results -> ./results/A0_control_sp10/
+01:54:31 | INFO | 
+============================================================
+01:54:31 | INFO |   SUMMARY
+01:54:31 | INFO | ============================================================
+01:54:31 | INFO |     Target    Actual      fEM      fF1      cEM      cF1     BOPs(M)   Params(M)
+01:54:31 | INFO |        10%    0.1000    46.70    57.36    46.60    57.30   1815877.5      103.21
+01:54:31 | INFO |   (fEM/fF1 = last-epoch eval before construct_subnet; cEM/cF1 = compressed model)
+01:54:31 | INFO | 
+[OK] Phase 5 complete. Results in ./results/

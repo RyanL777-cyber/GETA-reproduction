@@ -1,0 +1,142 @@
+[gpu] selected GPU 1 (util=24%, mem=8014MiB)
+18:48:52 | INFO | [log] ./results/phase5_20260427_184852.log
+18:48:52 | INFO | [env] torch=2.5.1+cu121  device=cuda
+18:48:52 | INFO | [cfg] sparsity=[0.3]  epochs=10  bs=4  lr=3e-05  lr_quant=0.0001  br=2  P=6  Kp=6  seed=42
+18:49:00 | INFO | [DATA] raw train=87599  raw val=10570
+18:49:00 | INFO | [DATA] train features=88524  val features=10784
+18:49:00 | INFO | 
+============================================================
+18:49:00 | INFO |   EXPERIMENT: sparsity=0.3  tag=C1_winner_sp30
+18:49:00 | INFO | ============================================================
+18:49:00 | INFO | [M1] loading BERT QA
+18:49:03 | INFO | [M2] quantize wrap + STE fix
+2026-04-27 18:49:03,595 - quant_fix - INFO - STE fix applied to SymQuantizerNonLinear and SymQuantizerLinear
+2026-04-27 18:49:06,303 - only_train_once.quantization.quant_model - INFO - Converted 73 layers to quantized versions
+18:49:06 | INFO | [CALIB] running 8 batches of bs=4
+18:49:09 | INFO | [calib] 8 batches over 73 layers  (skipped=0)  num_bits=16  safety=1.05
+18:49:09 | INFO | [calib] observed max|x|: min=2.665  median=14.866  max=137.556
+18:49:09 | INFO | [M3] building OTO graph
+/home/h24116081/miniconda3/lib/python3.13/site-packages/transformers/modeling_attn_mask_utils.py:196: TracerWarning: torch.tensor results are registered as constants in the trace. You can safely ignore this warning if you use this function to create tensors out of constant variables that would be the same every time you call this function. In any other case, this might cause the trace to be incorrect.
+  inverted_mask = torch.tensor(1.0, dtype=dtype) - expanded_mask
+/home/h24116081/GETA reprocution/GETA-reproduction/geta/only_train_once/quantization/quant_layers.py:334: TracerWarning: torch.tensor results are registered as constants in the trace. You can safely ignore this warning if you use this function to create tensors out of constant variables that would be the same every time you call this function. In any other case, this might cause the trace to be incorrect.
+  weight_clip_val = torch.tensor(self.weight_clip_val, device=weight.device)
+/home/h24116081/GETA reprocution/GETA-reproduction/geta/only_train_once/quantization/quant_layers.py:335: TracerWarning: torch.tensor results are registered as constants in the trace. You can safely ignore this warning if you use this function to create tensors out of constant variables that would be the same every time you call this function. In any other case, this might cause the trace to be incorrect.
+  q_s = torch.tensor(0.0, device=weight.device)
+/home/h24116081/GETA reprocution/GETA-reproduction/geta/only_train_once/quantization/quant_layers.py:361: TracerWarning: torch.tensor results are registered as constants in the trace. You can safely ignore this warning if you use this function to create tensors out of constant variables that would be the same every time you call this function. In any other case, this might cause the trace to be incorrect.
+  activation_clip_val = torch.tensor(self.act_clip_val, device=activation.device)
+/home/h24116081/GETA reprocution/GETA-reproduction/geta/only_train_once/quantization/quant_layers.py:362: TracerWarning: torch.tensor results are registered as constants in the trace. You can safely ignore this warning if you use this function to create tensors out of constant variables that would be the same every time you call this function. In any other case, this might cause the trace to be incorrect.
+  q_s = torch.tensor(0.0, device=activation.device)
+OTO graph constructor
+graph build
+NodePattern mul None
+NodePattern transpose None
+NodePattern matmul None
+Post-processing of graph completed.
+Graph has 1102 nodes and 1177 edges.
+18:52:04 | INFO | [SCHED] steps/epoch=22131  total=221310  start_prune=110655 (5.00 ep)  prune_steps=184425 (8.33 ep)  prune_periods=6  proj_periods=6  proj_steps=110655 (5.00 ep)
+18:52:04 | INFO | [BIT]   min_bit_wt=4  max_bit_wt=16  bit_reduction=2  calib_num_bits=16
+18:52:04 | INFO | [LR]    scheduler=linear  warmup_ratio=0.1  lr=3e-05  lr_quant=0.0001
+18:52:04 | INFO | [M4] building GETA optimizer
+2026-04-27 18:52:04,212 - GETA - INFO - Setup GETA
+2026-04-27 18:52:04,212 - GETA - INFO - importance_score_criteria: {'magnitude': 0.2, 'avg_magnitude': 0.2, 'cosine_similarity': 0.2, 'taylor_first_order': 0.2, 'taylor_second_order': 0.2}
+2026-04-27 18:52:04,212 - GETA - INFO - start_projection_step: 0
+2026-04-27 18:52:04,212 - GETA - INFO - projection_steps: 110655
+2026-04-27 18:52:04,212 - GETA - INFO - projection_periods: 6
+2026-04-27 18:52:04,212 - GETA - INFO - start_pruning_step: 110655
+2026-04-27 18:52:04,212 - GETA - INFO - pruning_steps: 184425
+2026-04-27 18:52:04,212 - GETA - INFO - pruning_periods: 6
+2026-04-27 18:52:04,212 - GETA - INFO - pruning_period_duration: 30737
+2026-04-27 18:52:04,215 - GETA - INFO - Target redundant groups per period: [1850, 1850, 1850, 1850, 1850, 1852]
+18:52:04 | INFO | [M4] GETA optimizer built, 26 param groups
+18:52:04 | INFO | [LR] linear schedule warmup=22131 decay over 199179
+18:52:04 | INFO | [TRAIN] starting
+Traceback (most recent call last):
+  File "/home/h24116081/GETA reprocution/GETA-reproduction/bert_geta_phase4_9/run_experiment.py", line 661, in <module>
+    main()
+    ~~~~^^
+  File "/home/h24116081/GETA reprocution/GETA-reproduction/bert_geta_phase4_9/run_experiment.py", line 638, in main
+    result = run_single(sp, args, tokenizer, raw_val, train_ds, val_ds, log)
+  File "/home/h24116081/GETA reprocution/GETA-reproduction/bert_geta_phase4_9/run_experiment.py", line 477, in run_single
+    out = model(**inputs)
+  File "/home/h24116081/miniconda3/lib/python3.13/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/home/h24116081/miniconda3/lib/python3.13/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/h24116081/miniconda3/lib/python3.13/site-packages/transformers/models/bert/modeling_bert.py", line 1739, in forward
+    outputs = self.bert(
+        input_ids,
+    ...<7 lines>...
+        return_dict=return_dict,
+    )
+  File "/home/h24116081/miniconda3/lib/python3.13/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/home/h24116081/miniconda3/lib/python3.13/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/h24116081/miniconda3/lib/python3.13/site-packages/transformers/models/bert/modeling_bert.py", line 1000, in forward
+    encoder_outputs = self.encoder(
+        embedding_output,
+    ...<9 lines>...
+        cache_position=cache_position,
+    )
+  File "/home/h24116081/miniconda3/lib/python3.13/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/home/h24116081/miniconda3/lib/python3.13/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/h24116081/miniconda3/lib/python3.13/site-packages/transformers/models/bert/modeling_bert.py", line 650, in forward
+    layer_outputs = layer_module(
+        hidden_states,
+    ...<6 lines>...
+        cache_position=cache_position,
+    )
+  File "/home/h24116081/miniconda3/lib/python3.13/site-packages/transformers/modeling_layers.py", line 94, in __call__
+    return super().__call__(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/home/h24116081/miniconda3/lib/python3.13/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/home/h24116081/miniconda3/lib/python3.13/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/h24116081/miniconda3/lib/python3.13/site-packages/transformers/utils/deprecation.py", line 172, in wrapped_func
+    return func(*args, **kwargs)
+  File "/home/h24116081/miniconda3/lib/python3.13/site-packages/transformers/models/bert/modeling_bert.py", line 588, in forward
+    layer_output = apply_chunking_to_forward(
+        self.feed_forward_chunk, self.chunk_size_feed_forward, self.seq_len_dim, attention_output
+    )
+  File "/home/h24116081/miniconda3/lib/python3.13/site-packages/transformers/pytorch_utils.py", line 257, in apply_chunking_to_forward
+    return forward_fn(*input_tensors)
+  File "/home/h24116081/miniconda3/lib/python3.13/site-packages/transformers/models/bert/modeling_bert.py", line 597, in feed_forward_chunk
+    layer_output = self.output(intermediate_output, attention_output)
+  File "/home/h24116081/miniconda3/lib/python3.13/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/home/h24116081/miniconda3/lib/python3.13/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/h24116081/miniconda3/lib/python3.13/site-packages/transformers/models/bert/modeling_bert.py", line 525, in forward
+    hidden_states = self.dense(hidden_states)
+  File "/home/h24116081/miniconda3/lib/python3.13/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/home/h24116081/miniconda3/lib/python3.13/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/h24116081/GETA reprocution/GETA-reproduction/geta/only_train_once/quantization/quant_layers.py", line 498, in forward
+    input_ = self.quantize_act(input_)
+  File "/home/h24116081/GETA reprocution/GETA-reproduction/geta/only_train_once/quantization/quant_layers.py", line 374, in quantize_act
+    return quantizer.apply(
+           ~~~~~~~~~~~~~~~^
+        activation,
+        ^^^^^^^^^^^
+    ...<4 lines>...
+        q_s,
+        ^^^^
+    )
+    ^
+  File "/home/h24116081/miniconda3/lib/python3.13/site-packages/torch/autograd/function.py", line 575, in apply
+    return super().apply(*args, **kwargs)  # type: ignore[misc]
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/home/h24116081/GETA reprocution/GETA-reproduction/geta/only_train_once/quantization/quant_layers.py", line 63, in forward
+    input_pow = torch.exp(t_quant * torch.log(input_abs - q_s))  # input_abs >= q_s
+                                    ~~~~~~~~~^^^^^^^^^^^^^^^^^
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 18.00 MiB. GPU 0 has a total capacity of 23.68 GiB of which 15.31 MiB is free. Process 2533141 has 4.36 GiB memory in use. Process 2534479 has 4.36 GiB memory in use. Process 2536138 has 4.36 GiB memory in use. Process 2536492 has 4.36 GiB memory in use. Process 2536642 has 4.36 GiB memory in use. Including non-PyTorch memory, this process has 994.00 MiB memory in use. Process 2539039 has 880.00 MiB memory in use. Of the allocated memory 589.63 MiB is allocated by PyTorch, and 98.37 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
