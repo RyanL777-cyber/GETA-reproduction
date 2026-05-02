@@ -1,20 +1,22 @@
 """
-Phase 5 — BERT x GETA full SQuAD experiment (Table 3 reproduction)
+Phase 5 — BERT x GETA full SQuAD experiment (Table 3 reproduction).
 
-Paper settings:
-  AdamW, lr=3e-5, lr_quant=1e-4, epochs=10, bit_range=[4,16],
-  B=4 (batch_size), P=6 (pruning_periods), Kp=6 (projection_periods),
-  Kb=1 (start pruning after 1 period), br=2 (bit_reduction)
+Recipe: B3_final (derived from Phase 4.9 diagnostic runs)
+  start_pruning_epoch=5, pruning_end_epoch=10, bit_reduction=1,
+  lr_scheduler=linear, warmup_ratio=0.1, calib_num_bits=16,
+  min_bit_wt=4, max_bit_wt=16
+
+Fixes applied vs original Phase 5:
+  1. STE fix (quant_fix.apply_ste_fix) — aligns backward saturate boundary
+     with forward, fixing ~15000x gradient imbalance across layers
+  2. Activation calibration (quant_fix.calibrate_quant_layers) — initialises
+     q_m_act from real SQuAD activations instead of weight statistics
+  3. Pruning schedule fix — pruning_steps now computed from pruning_end_epoch
+     so the schedule completes within the training window
 
 Usage:
-  # Run single sparsity level
-  python run_experiment.py --sparsity 0.5
-
-  # Run all 4 levels sequentially
-  python run_experiment.py --sparsity 0.1 0.3 0.5 0.7
-
-  # Override settings
-  python run_experiment.py --sparsity 0.5 --epochs 10 --seed 42
+  python run_experiment.py --sparsity 0.1 --start_pruning_epoch 5 --pruning_end_epoch 10 --bit_reduction 1 --lr_scheduler linear
+  python run_experiment.py --sparsity 0.1 0.3 0.5 0.7 --start_pruning_epoch 5 --pruning_end_epoch 10 --bit_reduction 1 --lr_scheduler linear
 """
 import argparse
 import collections
@@ -111,6 +113,26 @@ def parse_args():
                     help="number of calibration batches for activation quant init")
     p.add_argument("--calib_batch_size", type=int, default=4,
                     help="calibration batch size")
+    p.add_argument("--min_bit_wt", type=int, default=4,
+                    help="GETA min weight bit width (paper=4; set =max_bit_wt to disable bit reduction)")
+    p.add_argument("--max_bit_wt", type=int, default=16,
+                    help="GETA max weight bit width (paper=16)")
+    p.add_argument("--calib_num_bits", type=int, default=16,
+                    help="bit width passed to calibrate_quant_layers")
+    p.add_argument("--start_pruning_epoch", type=float, default=None,
+                    help="epoch at which pruning starts; default = total/pruning_periods (paper Kb=1)")
+    p.add_argument("--pruning_end_epoch", type=float, default=None,
+                    help="epoch at which pruning finishes; default uses period_len*(P-1)")
+    p.add_argument("--lr_scheduler", type=str, default="none", choices=["none", "linear"],
+                    help="LR schedule for both lr and lr_quant (linear = warmup+decay)")
+    p.add_argument("--warmup_ratio", type=float, default=0.1,
+                    help="warmup fraction of total steps when --lr_scheduler=linear")
+    p.add_argument("--exp_tag", type=str, default="",
+                    help="prefix for output dir; results/<tag>_sp<NN>/")
+    p.add_argument("--train_subset_frac", type=float, default=1.0,
+                    help="fraction of training set to use (1.0=full)")
+    p.add_argument("--val_subset_n", type=int, default=None,
+                    help="cap validation set to this many examples (None=full ~10570)")
     return p.parse_args()
 
 
@@ -192,10 +214,18 @@ def prepare_validation_features(examples, tokenizer):
     return inputs
 
 
-def load_squad(tokenizer, log):
+def load_squad(tokenizer, log, train_subset_frac=1.0, val_subset_n=None):
     raw_train = hf_datasets.load_dataset("squad", split="train")
     raw_val = hf_datasets.load_dataset("squad", split="validation")
     log.info(f"[DATA] raw train={len(raw_train)}  raw val={len(raw_val)}")
+
+    if train_subset_frac < 1.0:
+        n_keep = max(1, int(len(raw_train) * train_subset_frac))
+        raw_train = raw_train.shuffle(seed=42).select(range(n_keep))
+        log.info(f"[DATA] train subsetted to {n_keep} ({train_subset_frac:.0%})")
+    if val_subset_n is not None and val_subset_n < len(raw_val):
+        raw_val = raw_val.select(range(val_subset_n))
+        log.info(f"[DATA] val subsetted to {val_subset_n}")
 
     train_ds = raw_train.map(
         lambda ex: prepare_train_features(ex, tokenizer),
@@ -297,7 +327,8 @@ def evaluate(model, raw_val, val_ds, batch_size):
 # Single experiment
 # =========================================================================
 def run_single(sparsity, args, tokenizer, raw_val, train_ds, val_ds, log):
-    tag = f"sp{int(sparsity*100):02d}"
+    sp_tag = f"sp{int(sparsity*100):02d}"
+    tag = f"{args.exp_tag}_{sp_tag}" if args.exp_tag else sp_tag
     out_dir = os.path.join(args.out_root, tag)
     os.makedirs(out_dir, exist_ok=True)
 
@@ -305,16 +336,13 @@ def run_single(sparsity, args, tokenizer, raw_val, train_ds, val_ds, log):
     log.info(f"  EXPERIMENT: sparsity={sparsity}  tag={tag}")
     log.info(f"{'='*60}")
 
-    # --- seed ---
     torch.manual_seed(args.seed)
     np.random.seed(args.seed)
 
-    # --- M1: load ---
     log.info("[M1] loading BERT QA")
     from transformers import AutoModelForQuestionAnswering
     model = AutoModelForQuestionAnswering.from_pretrained(MODEL_NAME).to(DEVICE)
 
-    # --- M2: quantize + STE fix (phase 4.5 fix) ---
     log.info("[M2] quantize wrap + STE fix")
     from only_train_once.quantization.quant_model import model_to_quantize_model
     from only_train_once.quantization.quant_layers import QuantizationMode
@@ -323,7 +351,6 @@ def run_single(sparsity, args, tokenizer, raw_val, train_ds, val_ds, log):
     model = model_to_quantize_model(model, quant_mode=QuantizationMode.WEIGHT_AND_ACTIVATION)
     model = model.to(DEVICE)
 
-    # --- M2.5: calibrate activation quant on real SQuAD batches ---
     log.info(f"[CALIB] running {args.calib_batches} batches of bs={args.calib_batch_size}")
     calib_batches = []
     for i in range(args.calib_batches):
@@ -337,9 +364,8 @@ def run_single(sparsity, args, tokenizer, raw_val, train_ds, val_ds, log):
             for k in ("input_ids", "attention_mask", "token_type_ids")
             if k in batch
         })
-    calibrate_quant_layers(model, calib_batches, num_bits=16, log=log)
+    calibrate_quant_layers(model, calib_batches, num_bits=args.calib_num_bits, log=log)
 
-    # --- M3: OTO ---
     log.info("[M3] building OTO graph")
     enc = tokenizer("What?", "Paris.", max_length=MAX_LENGTH, truncation="only_second",
                     padding="max_length", return_tensors="pt")
@@ -350,25 +376,34 @@ def run_single(sparsity, args, tokenizer, raw_val, train_ds, val_ds, log):
     model.train()
     oto.mark_unprunable_by_param_names(["bert.embeddings.word_embeddings.weight"])
 
-    # --- Schedule ---
     steps_per_epoch = (len(train_ds) + args.batch_size - 1) // args.batch_size
     total_steps = steps_per_epoch * args.epochs
-    # Paper: Kb=1 means start pruning after 1 pruning_period worth of steps
     period_len = total_steps // args.pruning_periods if args.pruning_periods > 0 else total_steps
-    start_pruning_step = max(1, period_len)  # after 1 period warmup
-    pruning_steps = max(1, period_len * (args.pruning_periods - 1))  # remaining periods
-    # Projection phase runs in [start_projection_step, start_pruning_step],
-    # reducing bit-width br per projection_period. projection_steps must be
-    # >= projection_periods or period_duration = projection_steps // projection_periods = 0.
+
+    if args.start_pruning_epoch is not None:
+        start_pruning_step = max(1, int(args.start_pruning_epoch * steps_per_epoch))
+    else:
+        start_pruning_step = max(1, period_len)
+
+    if args.pruning_end_epoch is not None:
+        pruning_end_step = int(args.pruning_end_epoch * steps_per_epoch)
+        pruning_steps = max(1, pruning_end_step - start_pruning_step)
+    else:
+        pruning_steps = max(1, period_len * (args.pruning_periods - 1))
+
     start_projection_step = 0
     projection_steps = max(args.projection_periods, start_pruning_step - start_projection_step)
 
     log.info(f"[SCHED] steps/epoch={steps_per_epoch}  total={total_steps}  "
-             f"start_prune={start_pruning_step}  prune_steps={pruning_steps}  "
+             f"start_prune={start_pruning_step} ({start_pruning_step/steps_per_epoch:.2f} ep)  "
+             f"prune_steps={pruning_steps} ({pruning_steps/steps_per_epoch:.2f} ep)  "
              f"prune_periods={args.pruning_periods}  proj_periods={args.projection_periods}  "
-             f"proj_steps={projection_steps}")
+             f"proj_steps={projection_steps} ({projection_steps/steps_per_epoch:.2f} ep)")
+    log.info(f"[BIT]   min_bit_wt={args.min_bit_wt}  max_bit_wt={args.max_bit_wt}  "
+             f"bit_reduction={args.bit_reduction}  calib_num_bits={args.calib_num_bits}")
+    log.info(f"[LR]    scheduler={args.lr_scheduler}  warmup_ratio={args.warmup_ratio}  "
+             f"lr={args.lr}  lr_quant={args.lr_quant}")
 
-    # --- M4: GETA optimizer ---
     log.info("[M4] building GETA optimizer")
     optimizer = oto.geta(
         variant="adamw",
@@ -382,14 +417,31 @@ def run_single(sparsity, args, tokenizer, raw_val, train_ds, val_ds, log):
         pruning_steps=pruning_steps,
         pruning_periods=args.pruning_periods,
         bit_reduction=args.bit_reduction,
-        min_bit_wt=4,
-        max_bit_wt=16,
+        min_bit_wt=args.min_bit_wt,
+        max_bit_wt=args.max_bit_wt,
     )
     log.info(f"[M4] GETA optimizer built, {len(optimizer.param_groups)} param groups")
 
-    # --- Training ---
+    base_lrs = [g.get("lr", args.lr) for g in optimizer.param_groups]
+    base_lr_quants = [g.get("lr_quant", args.lr_quant) for g in optimizer.param_groups]
+    base_lr_quant_default = getattr(optimizer, "lr_quant", args.lr_quant)
+    if args.lr_scheduler == "linear":
+        warmup_steps = max(1, int(args.warmup_ratio * total_steps))
+        log.info(f"[LR] linear schedule warmup={warmup_steps} decay over {total_steps - warmup_steps}")
+
+        def lr_multiplier(step):
+            if step < warmup_steps:
+                return step / max(1, warmup_steps)
+            remain = max(0, total_steps - step)
+            return remain / max(1, total_steps - warmup_steps)
+    else:
+        def lr_multiplier(step):
+            return 1.0
+
     log.info("[TRAIN] starting")
-    best_f1, best_epoch = -1, 0
+    best_f1, best_epoch = -1.0, 0
+    final_f1, final_em = -1.0, -1.0
+    epoch_log = []
     global_step = 0
     t_start = time.time()
 
@@ -413,6 +465,13 @@ def run_single(sparsity, args, tokenizer, raw_val, train_ds, val_ds, log):
 
             loss.backward()
             optimizer.step()
+
+            if args.lr_scheduler != "none":
+                mult = lr_multiplier(global_step)
+                for g, base_lr, base_lq in zip(optimizer.param_groups, base_lrs, base_lr_quants):
+                    g["lr"] = base_lr * mult
+                    g["lr_quant"] = base_lq * mult
+                optimizer.lr_quant = base_lr_quant_default * mult
 
             epoch_loss += loss.item()
             n_batches += 1
@@ -438,21 +497,27 @@ def run_single(sparsity, args, tokenizer, raw_val, train_ds, val_ds, log):
                          f"EM={em:.2f}  F1={f1:.2f}  elapsed={elapsed:.1f}min")
                 if f1 > best_f1:
                     best_f1, best_epoch = f1, epoch
+                final_f1, final_em = f1, em
+                epoch_log.append({"epoch": epoch, "loss": avg_loss,
+                                  "grp_sp": float(metrics.group_sparsity),
+                                  "em": em, "f1": f1})
             else:
                 log.info(f"[EPOCH {epoch}/{args.epochs}] loss={avg_loss:.4f}  "
                          f"grp_sp={metrics.group_sparsity:.3f}  "
                          f"(eval skipped)  elapsed={elapsed:.1f}min")
+                epoch_log.append({"epoch": epoch, "loss": avg_loss,
+                                  "grp_sp": float(metrics.group_sparsity),
+                                  "em": None, "f1": None})
             continue
         break
 
-    log.info(f"[TRAIN] done. best F1={best_f1:.2f} at epoch {best_epoch}")
+    log.info(f"[TRAIN] done. best F1={best_f1:.2f} @ ep{best_epoch} (pre-compression)  "
+             f"final F1={final_f1:.2f}")
 
-    # --- Capture actual group sparsity (lost after construct_subnet) ---
     final_metrics = optimizer.compute_metrics()
     actual_group_sparsity = float(final_metrics.group_sparsity)
     log.info(f"[FINAL] target sparsity={sparsity}  actual={actual_group_sparsity:.4f}")
 
-    # --- construct_subnet ---
     log.info("[SUBNET] constructing compressed model")
     try:
         oto.construct_subnet(
@@ -480,10 +545,10 @@ def run_single(sparsity, args, tokenizer, raw_val, train_ds, val_ds, log):
         em_c, f1_c, preds = -1, -1, {}
         full_bops, full_params = {"total": -1}, -1
 
-    # --- Save results ---
     result = {
         "sparsity": sparsity,
         "actual_group_sparsity": actual_group_sparsity,
+        "exp_tag": args.exp_tag,
         "seed": args.seed,
         "epochs": args.epochs,
         "batch_size": args.batch_size,
@@ -492,12 +557,24 @@ def run_single(sparsity, args, tokenizer, raw_val, train_ds, val_ds, log):
         "bit_reduction": args.bit_reduction,
         "pruning_periods": args.pruning_periods,
         "projection_periods": args.projection_periods,
+        "min_bit_wt": args.min_bit_wt,
+        "max_bit_wt": args.max_bit_wt,
+        "calib_num_bits": args.calib_num_bits,
+        "start_pruning_epoch": args.start_pruning_epoch,
+        "pruning_end_epoch": args.pruning_end_epoch,
+        "lr_scheduler": args.lr_scheduler,
+        "warmup_ratio": args.warmup_ratio,
+        "train_subset_frac": args.train_subset_frac,
+        "val_subset_n": args.val_subset_n,
         "best_f1": best_f1,
         "best_epoch": best_epoch,
+        "final_f1": final_f1,
+        "final_em": final_em,
         "compressed_em": em_c,
         "compressed_f1": f1_c,
         "bops_million": full_bops["total"],
         "params_million": full_params,
+        "epoch_log": epoch_log,
     }
     with open(os.path.join(out_dir, "result.json"), "w") as f:
         json.dump(result, f, indent=2)
@@ -515,7 +592,6 @@ def run_single(sparsity, args, tokenizer, raw_val, train_ds, val_ds, log):
 def main():
     args = parse_args()
 
-    # --- Logger ---
     os.makedirs(args.out_root, exist_ok=True)
     ts = datetime.now().strftime("%Y%m%d_%H%M%S")
     log_path = os.path.join(args.out_root, f"phase5_{ts}.log")
@@ -527,28 +603,30 @@ def main():
              f"lr={args.lr}  lr_quant={args.lr_quant}  br={args.bit_reduction}  "
              f"P={args.pruning_periods}  Kp={args.projection_periods}  seed={args.seed}")
 
-    # --- Tokenizer + data (load once, reuse across sparsity levels) ---
     from transformers import AutoTokenizer
     tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
-    raw_val, train_ds, val_ds = load_squad(tokenizer, log)
+    raw_val, train_ds, val_ds = load_squad(
+        tokenizer, log,
+        train_subset_frac=args.train_subset_frac,
+        val_subset_n=args.val_subset_n,
+    )
 
-    # --- Run experiments ---
     all_results = []
     for sp in args.sparsity:
         result = run_single(sp, args, tokenizer, raw_val, train_ds, val_ds, log)
         all_results.append(result)
 
-    # --- Summary table ---
     log.info(f"\n{'='*60}")
     log.info("  SUMMARY")
     log.info(f"{'='*60}")
-    log.info(f"  {'Target':>8}  {'Actual':>8}  {'EM':>8}  {'F1':>8}  {'BOPs(M)':>10}  {'Params(M)':>10}")
+    log.info(f"  {'Target':>8}  {'Actual':>8}  {'fEM':>7}  {'fF1':>7}  {'cEM':>7}  {'cF1':>7}  {'BOPs(M)':>10}  {'Params(M)':>10}")
     for r in all_results:
         log.info(f"  {r['sparsity']:>8.0%}  {r['actual_group_sparsity']:>8.4f}  "
-                 f"{r['compressed_em']:>8.2f}  {r['compressed_f1']:>8.2f}  "
+                 f"{r['final_em']:>7.2f}  {r['final_f1']:>7.2f}  "
+                 f"{r['compressed_em']:>7.2f}  {r['compressed_f1']:>7.2f}  "
                  f"{r['bops_million']:>10.1f}  {r['params_million']:>10.2f}")
+    log.info("  (fEM/fF1 = last-epoch eval before construct_subnet; cEM/cF1 = compressed model)")
 
-    # Save summary
     with open(os.path.join(args.out_root, "summary.json"), "w") as f:
         json.dump(all_results, f, indent=2)
 
