@@ -45,3 +45,6 @@
 
 1. **`sp=0.7, bit_reduction=2, bs=16, ~12ep`** — 直接驗證是不是 br=1 害的
 2. 如果 #1 還不夠,**退回論文 config: `bs=4, br=2`**(代價 ~25h/sparsity 點)
+
+
+/home/h24116081/GETA reprocution/GETA-reproduction/bert_geta_clean
