@@ -1,0 +1,34 @@
+From: bert_geta_clean
+Subject: [PATCH] graph: dedup param groups smallest-first
+
+Iterate dedup in (group_size, group_id) order so per-layer specific groups
+(e.g. BERT attention head groups) keep their params instead of losing them
+to the larger trunk group. Without this, BERT's layer.0 head group gets
+emptied because its group_id sorts after the trunk group's id.
+
+See docs/BERT_GETA_PATCH_GUIDE.md fix #1.
+
+---
+ only_train_once/graph/graph.py | 9 ++++++++-
+ 1 file changed, 8 insertions(+), 1 deletion(-)
+
+diff --git a/only_train_once/graph/graph.py b/only_train_once/graph/graph.py
+--- a/only_train_once/graph/graph.py
++++ b/only_train_once/graph/graph.py
+@@ -1367,8 +1367,15 @@ class Graph:
+
+         # Deduplicate parameters across groups to avoid invalid PyTorch optimizer
+         # initialization when the same parameter appears in multiple groups.
++        # Iterate smaller groups first so per-layer (e.g. head) groups keep their
++        # params instead of losing them to the large trunk group. Falling back to
++        # group_id for deterministic tie-breaking.
+         seen_param_ids = set()
+-        for group_id, param_group in list(param_groups.items()):
++        dedup_order = sorted(
++            param_groups.items(),
++            key=lambda kv: (len(kv[1].get("params", [])), kv[0]),
++        )
++        for group_id, param_group in dedup_order:
+             params = param_group.get("params", [])
+             if len(params) == 0:
+                 continue
