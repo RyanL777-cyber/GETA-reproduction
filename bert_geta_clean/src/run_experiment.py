@@ -30,10 +30,25 @@ import time
 import traceback
 from datetime import datetime
 
-# --- GETA source path (sibling of src/) ---
-_GETA_ROOT = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "geta")
-if os.path.isdir(_GETA_ROOT) and _GETA_ROOT not in sys.path:
-    sys.path.insert(0, _GETA_ROOT)
+# --- GETA source path ---
+# Try (1) bert_geta_clean/geta/ as documented in README, then (2) the
+# sibling-of-bert_geta_clean geta/ (i.e. GETA-reproduction/geta) so an
+# already-patched upstream checkout one level up is picked up automatically.
+_CLEAN_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+_GETA_CANDIDATES = [
+    os.path.join(_CLEAN_ROOT, "geta"),
+    os.path.join(os.path.dirname(_CLEAN_ROOT), "geta"),
+]
+for _GETA_ROOT in _GETA_CANDIDATES:
+    if os.path.isdir(os.path.join(_GETA_ROOT, "only_train_once")):
+        if _GETA_ROOT not in sys.path:
+            sys.path.insert(0, _GETA_ROOT)
+        break
+else:
+    raise RuntimeError(
+        "Cannot locate `only_train_once` under any of: "
+        + ", ".join(_GETA_CANDIDATES)
+    )
 
 
 # --- Auto GPU selection (must precede import torch) ---
